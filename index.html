@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Between the Pages — a private reading room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,300;7..72,400;7..72,500;7..72,600;7..72,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F1E9DA; --card:#FBF6EC; --card-2:#F6EFE1;
+  --ink:#211D18; --ink-2:#5E564A; --muted:#8C8172; --line:#E0D4BE;
+  --green:#2F5D4E; --green-2:#23483C; --green-soft:#E2EBE5;
+  --brass:#B08432; --oxblood:#8A3324; --plum:#57436E; --sky:#37617E;
+  --serif:'Literata',Georgia,'Iowan Old Style',serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --ease:cubic-bezier(.22,.9,.25,1);
+  --spring:cubic-bezier(.34,1.45,.6,1);
+  --r:16px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body:before{ /* paper grain */
+  content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.32;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:none;cursor:pointer;color:inherit}
+a{color:var(--green)}
+:focus-visible{outline:2.5px solid var(--green);outline-offset:2px;border-radius:6px}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;letter-spacing:-.02em;margin:0}
+.serif{font-family:var(--serif)}
+
+/* ============ chrome ============ */
+.chrome{
+  position:sticky;top:0;z-index:30;background:rgba(241,233,218,.88);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.chrome-in{max-width:1120px;margin:0 auto;padding:13px 20px;display:flex;align-items:center;gap:22px}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--serif);font-size:18px;font-weight:600;letter-spacing:-.02em}
+.brand .bk{font-size:20px}
+.nav{display:flex;gap:4px;margin-left:8px}
+.nav button{
+  padding:8px 14px;border-radius:999px;font-size:14.5px;color:var(--ink-2);font-weight:500;
+  transition:background .22s,color .22s,transform .3s var(--spring)
+}
+.nav button:hover{background:rgba(47,93,78,.09);color:var(--ink)}
+.nav button[aria-current="page"]{background:var(--green);color:#FBF6EC}
+.chrome-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.icon-btn{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:17px;
+  border:1px solid var(--line);background:var(--card);transition:transform .3s var(--spring),border-color .2s}
+.icon-btn:hover{transform:translateY(-2px);border-color:var(--green)}
+.dotmark{position:absolute;width:8px;height:8px;background:var(--oxblood);border-radius:50%;transform:translate(13px,-13px)}
+.me-btn{display:flex;align-items:center;gap:8px;padding:5px 13px 5px 6px;border:1px solid var(--line);
+  background:var(--card);border-radius:999px;transition:transform .3s var(--spring),border-color .2s}
+.me-btn:hover{transform:translateY(-2px);border-color:var(--green)}
+.me-btn .av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:15px;background:var(--green-soft)}
+.me-btn span{font-size:13.5px;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:860px){.nav{display:none}.chrome-in{padding:11px 16px}}
+
+/* ============ layout ============ */
+main{max-width:1120px;margin:0 auto;padding:26px 20px 130px;position:relative;z-index:2}
+.view{animation:turn .42s var(--ease)}
+@keyframes turn{from{opacity:0;transform:translateX(22px) rotateY(2.5deg)}to{opacity:1;transform:none}}
+.section{margin:38px 0 0}
+.section:first-child{margin-top:8px}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:15px}
+.sec-head h2{font-size:20px}
+.sec-head .hint{font-size:13px;color:var(--muted)}
+.sec-head .more{margin-left:auto;font-size:13.5px;color:var(--green);font-weight:600}
+
+/* ============ home ============ */
+.greet{font-size:clamp(30px,5.4vw,44px);line-height:1.05;margin:6px 0 6px}
+.greet-sub{color:var(--ink-2);font-size:16.5px;margin:0 0 4px;font-family:var(--serif);font-style:italic}
+.now{
+  display:grid;grid-template-columns:112px 1fr;gap:22px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);padding:22px;margin-top:22px;position:relative;overflow:hidden;
+  box-shadow:0 2px 0 rgba(33,29,24,.05),0 18px 40px -28px rgba(33,29,24,.5)
+}
+.now:after{content:"";position:absolute;right:-60px;top:-60px;width:190px;height:190px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(176,132,50,.2),transparent)}
+.now h3{font-size:25px;line-height:1.15;margin:0 0 3px}
+.now .auth{color:var(--ink-2);font-size:14.5px;margin:0 0 16px}
+.bar{height:10px;background:var(--card-2);border:1px solid var(--line);border-radius:999px;overflow:hidden;position:relative}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),#4C8570);border-radius:999px;
+  transition:width .9s var(--ease)}
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.bar-row .pc{font-size:13.5px;font-weight:700;color:var(--green);min-width:42px;text-align:right}
+.row-btns{display:flex;gap:9px;flex-wrap:wrap}
+.btn{
+  border-radius:999px;padding:11px 20px;font-size:14.5px;font-weight:600;border:1.5px solid var(--line);
+  background:var(--card);transition:transform .28s var(--spring),background .22s,border-color .22s,color .22s
+}
+.btn:hover{transform:translateY(-2px);border-color:var(--green)}
+.btn.primary{background:var(--green);color:#FBF6EC;border-color:var(--green)}
+.btn.primary:hover{background:var(--green-2)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--green)}
+.btn.small{padding:8px 15px;font-size:13.5px}
+.btn[disabled]{opacity:.55;cursor:wait;transform:none}
+@media (max-width:620px){.now{grid-template-columns:88px 1fr;gap:16px;padding:17px}}
+
+/* ============ covers ============ */
+.cover{
+  position:relative;aspect-ratio:2/3;border-radius:3px 8px 8px 3px;overflow:hidden;display:flex;
+  flex-direction:column;justify-content:space-between;padding:13px 12px 12px 17px;color:#F7F1E6;
+  background:linear-gradient(150deg,var(--c1),var(--c2));
+  box-shadow:0 1px 2px rgba(0,0,0,.28),0 14px 26px -14px rgba(33,29,24,.7)
+}
+.cover:before{content:"";position:absolute;left:0;top:0;bottom:0;width:9px;
+  background:linear-gradient(90deg,rgba(0,0,0,.34),rgba(255,255,255,.14));}
+.cover:after{content:"";position:absolute;inset:7px 7px 7px 14px;border:1px solid rgba(247,241,230,.28);border-radius:2px;pointer-events:none}
+.cover .ct{font-family:var(--serif);font-weight:600;font-size:clamp(11px,1.15vw,15px);line-height:1.2;
+  text-shadow:0 1px 3px rgba(0,0,0,.35);z-index:1;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.cover .ca{font-size:10px;opacity:.82;z-index:1;letter-spacing:.02em}
+.cover .glyph{position:absolute;right:-14px;bottom:-16px;font-size:66px;opacity:.16;z-index:0}
+
+/* ============ book grid ============ */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:20px}
+.bcard{text-align:left;perspective:900px;display:block;width:100%}
+.bcard .inner{transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
+.bcard:hover .inner{transform:translateY(-7px) rotateX(5deg) rotateY(-4deg)}
+.bcard h3{font-size:15.5px;line-height:1.25;margin:13px 0 2px}
+.bcard .auth{font-size:12.5px;color:var(--muted);margin:0}
+.bcard .stat{display:flex;gap:11px;font-size:12.5px;color:var(--ink-2);margin-top:7px;align-items:center}
+.bcard .who{font-size:12px;color:var(--green);font-weight:600;margin-top:5px}
+
+/* shelf view */
+.shelfview{background:linear-gradient(#E8DEC8,#DFD2B6);border-radius:10px;padding:26px 20px 0;border:1px solid var(--line)}
+.shelfrow{display:flex;align-items:flex-end;gap:9px;overflow-x:auto;padding-bottom:0;scrollbar-width:none}
+.shelfrow::-webkit-scrollbar{display:none}
+.plank{height:13px;border-radius:2px;margin:0 -20px 24px;
+  background:linear-gradient(#7A5433,#4E331D);box-shadow:0 8px 18px rgba(33,29,24,.35)}
+.spine{flex:0 0 auto;width:var(--w);height:var(--h);border-radius:3px 3px 1px 1px;color:#F7F1E6;
+  background:linear-gradient(100deg,rgba(0,0,0,.3),rgba(255,255,255,.12) 25%,rgba(0,0,0,.15) 75%),var(--c1);
+  display:grid;place-items:center;transform-origin:bottom center;
+  transition:transform .35s var(--spring),box-shadow .3s;box-shadow:2px 3px 9px rgba(33,29,24,.4)}
+.spine span{writing-mode:vertical-rl;font-family:var(--serif);font-size:12px;font-weight:600;max-height:84%;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.spine:hover{transform:translateY(-14px) rotate(-3.5deg)}
+
+/* ============ book page ============ */
+.bhead{display:grid;grid-template-columns:164px 1fr;gap:28px;align-items:start}
+@media (max-width:640px){.bhead{grid-template-columns:112px 1fr;gap:18px}}
+.bhead h1{font-size:clamp(26px,5vw,38px);line-height:1.08;margin-bottom:4px}
+.bhead .auth{font-family:var(--serif);font-style:italic;color:var(--ink-2);font-size:17px;margin:0 0 14px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.pill{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 13px;font-size:13px;color:var(--ink-2);display:flex;gap:6px;align-items:center}
+.pill.b{background:var(--green-soft);border-color:#C3D6CB;color:var(--green-2);font-weight:600}
+.statusrow{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 0}
+.st{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:600;
+  transition:transform .28s var(--spring),background .2s,color .2s,border-color .2s}
+.st:hover{transform:translateY(-2px)}
+.st[aria-pressed="true"]{color:#FBF6EC;border-color:transparent}
+.st[data-s="reading"][aria-pressed="true"]{background:var(--brass)}
+.st[data-s="finished"][aria-pressed="true"]{background:var(--green)}
+.st[data-s="want"][aria-pressed="true"]{background:var(--sky)}
+.st[data-s="dnf"][aria-pressed="true"]{background:var(--oxblood)}
+.readers{display:grid;gap:11px;margin-top:6px}
+.reader{display:grid;grid-template-columns:34px 1fr 60px;gap:11px;align-items:center;font-size:14px}
+.reader .av{width:34px;height:34px;border-radius:50%;background:var(--green-soft);display:grid;place-items:center;font-size:17px}
+.reader .nm{font-weight:600;font-size:13.5px}
+.reader .bar{height:7px}
+.reader .pc{font-size:12px;color:var(--muted);text-align:right}
+
+/* ============ posts ============ */
+.post{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:19px 20px;margin-bottom:16px;
+  position:relative;box-shadow:0 1px 0 rgba(33,29,24,.04);animation:place .45s var(--ease) backwards
+}
+@keyframes place{from{opacity:0;transform:translateY(-14px) rotate(-.6deg) scale(.985)}to{opacity:1;transform:none}}
+.post.mine{border-color:#C6D8CD;background:linear-gradient(#FBF6EC,#F4F7F2)}
+.phead{display:flex;align-items:center;gap:11px;margin-bottom:11px}
+.phead .av{width:38px;height:38px;border-radius:50%;background:var(--green-soft);display:grid;place-items:center;font-size:19px;flex:0 0 auto}
+.phead .nm{font-weight:700;font-size:14.5px;line-height:1.25}
+.phead .sub{font-size:12.5px;color:var(--muted)}
+.phead .kind{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--green-2);background:var(--green-soft);
+  padding:4px 10px;border-radius:999px}
+.phead .kind.hot{background:#F6E2DC;color:var(--oxblood)}
+.phead .kind.upd{background:#F6EBD6;color:#7A5A1C}
+.ptitle{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 3px}
+.ptitle a{text-decoration:none;color:inherit;border-bottom:1.5px solid var(--line)}
+.ptitle a:hover{border-color:var(--green)}
+.ptext{font-family:var(--serif);font-size:16px;line-height:1.62;white-space:pre-wrap;margin:8px 0 0;color:#2A251F}
+.quote{font-family:var(--serif);font-style:italic;font-size:16.5px;line-height:1.55;border-left:3px solid var(--brass);
+  padding:4px 0 4px 15px;margin:14px 0 0;color:#3A332B}
+.moods{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.mood{font-size:12.5px;background:var(--card-2);border:1px solid var(--line);border-radius:999px;padding:4px 11px}
+.stars{display:inline-flex;gap:3px;vertical-align:middle}
+.stars i{width:13px;height:13px;background:var(--line);border-radius:2px;transform:rotate(45deg)}
+.stars i.on{background:var(--brass)}
+.rating-line{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2);margin-bottom:2px}
+.rec{font-size:12.5px;font-weight:600;color:var(--green-2)}
+.pfoot{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:15px;padding-top:13px;border-top:1px solid var(--line)}
+.rchip{border:1px solid var(--line);background:var(--card-2);border-radius:999px;padding:5px 11px;font-size:14px;
+  display:flex;gap:5px;align-items:center;transition:transform .25s var(--spring),background .2s}
+.rchip:hover{transform:translateY(-3px) scale(1.05)}
+.rchip.mine{background:var(--green-soft);border-color:#B9CFC2}
+.rchip .c{font-size:12px;font-weight:700;color:var(--ink-2)}
+.addr{border:1px dashed var(--line);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--muted)}
+.addr:hover{border-color:var(--green);color:var(--green)}
+.cbtn{font-size:13px;color:var(--muted);font-weight:600;margin-left:auto}
+.cbtn:hover{color:var(--green)}
+.thread{margin:13px 0 0;padding-left:15px;border-left:2px solid var(--line);display:none}
+.thread.on{display:block;animation:slideDown .35s var(--ease)}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.cmt{display:flex;gap:9px;margin:11px 0;font-size:14.5px;line-height:1.5}
+.cmt .av{width:26px;height:26px;border-radius:50%;background:var(--green-soft);display:grid;place-items:center;font-size:13px;flex:0 0 auto}
+.cmt b{font-size:13.5px}
+.cmt .t{color:var(--muted);font-size:11.5px;margin-left:5px}
+.cform{display:flex;gap:8px;margin-top:10px}
+.cform input{flex:1;background:var(--card-2);border:1px solid var(--line);border-radius:999px;padding:10px 15px;font-size:14px}
+.cform input:focus{outline:none;border-color:var(--green)}
+
+/* spoilers */
+.locked{
+  background:repeating-linear-gradient(-45deg,var(--card-2) 0 12px,#F1E8D6 12px 24px);
+  border:1px dashed var(--line);border-radius:12px;padding:20px;text-align:center;margin-top:12px
+}
+.locked p{margin:0 0 10px;font-size:14px;color:var(--ink-2);line-height:1.55}
+.locked b{font-family:var(--serif)}
+.blurred{filter:blur(7px);user-select:none;transition:filter .5s var(--ease)}
+.revealed .blurred{filter:none}
+
+/* hot takes */
+.take{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--oxblood);
+  border-radius:12px;padding:19px 20px;margin-bottom:15px}
+.take .q{font-family:var(--serif);font-size:20px;line-height:1.35;margin:0 0 15px;font-weight:500}
+.votes{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.vb{border:1.5px solid var(--line);border-radius:999px;padding:9px 17px;font-size:13.5px;font-weight:600;
+  transition:transform .28s var(--spring),background .2s,color .2s}
+.vb:hover{transform:translateY(-2px)}
+.vb.on{background:var(--oxblood);color:#FBF6EC;border-color:transparent}
+.vb.on.agree{background:var(--green);}
+.tally{height:9px;border-radius:999px;overflow:hidden;display:flex;margin-top:14px;border:1px solid var(--line)}
+.tally i{display:block;height:100%;transition:width .7s var(--ease)}
+.tally .a{background:var(--green)} .tally .d{background:var(--oxblood)}
+.tally-lab{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:6px}
+
+/* rooms */
+.rooms{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:14px}
+.room{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px;text-align:left;
+  transition:transform .32s var(--spring),box-shadow .3s,border-color .2s}
+.room:hover{transform:translateY(-5px);border-color:var(--green);box-shadow:0 16px 30px -22px rgba(33,29,24,.8)}
+.room .e{font-size:26px;display:block;margin-bottom:9px}
+.room .n{font-family:var(--serif);font-weight:600;font-size:15.5px;line-height:1.2}
+.room .c{font-size:12.5px;color:var(--muted);margin-top:4px}
+.group-lab{font-family:var(--serif);font-size:14px;color:var(--muted);margin:26px 0 11px;font-style:italic}
+
+/* activity */
+.act{display:flex;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);align-items:flex-start;font-size:14.5px;line-height:1.5}
+.act .av{width:34px;height:34px;border-radius:50%;background:var(--green-soft);display:grid;place-items:center;font-size:17px;flex:0 0 auto}
+.act .t{font-size:12px;color:var(--muted);margin-top:3px}
+.act b{font-weight:700}
+
+/* profile */
+.prof{text-align:center;padding:14px 0 4px}
+.prof .big{width:92px;height:92px;border-radius:50%;background:var(--green-soft);display:grid;place-items:center;
+  font-size:44px;margin:0 auto 14px;border:1px solid var(--line);animation:popin .55s var(--spring)}
+@keyframes popin{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.prof h1{font-size:30px}
+.prof .bio{font-family:var(--serif);font-style:italic;color:var(--ink-2);margin:8px 0 0}
+.stats{display:flex;justify-content:center;gap:30px;margin:22px 0 4px;flex-wrap:wrap}
+.stat-b{text-align:center}
+.stat-b .n{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1}
+.stat-b .l{font-size:12px;color:var(--muted);margin-top:4px}
+.tabs{display:flex;gap:5px;overflow-x:auto;border-bottom:1px solid var(--line);margin:26px 0 18px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{padding:10px 15px;font-size:14px;font-weight:600;color:var(--muted);border-bottom:2.5px solid transparent;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--green);border-color:var(--green)}
+.badges{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+.badge{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:13px;font-weight:600;
+  animation:popin .45s var(--spring) backwards}
+
+/* empty states */
+.empty{text-align:center;padding:56px 18px;border:1px dashed var(--line);border-radius:var(--r);background:var(--card-2)}
+.empty .e{font-size:36px;display:block;margin-bottom:12px;opacity:.8}
+.empty p{font-family:var(--serif);font-size:19px;color:var(--ink-2);margin:0 0 18px;line-height:1.45}
+
+/* recap */
+.recap{background:linear-gradient(150deg,var(--green),#1E3B31);color:#F1E9DA;border-radius:var(--r);padding:26px;position:relative;overflow:hidden}
+.recap:after{content:"📚";position:absolute;right:-10px;bottom:-24px;font-size:110px;opacity:.13}
+.recap h2{color:#F7F1E6;font-size:21px;margin-bottom:4px}
+.recap .sm{font-size:13px;opacity:.72}
+.recap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:18px;margin-top:20px;position:relative;z-index:1}
+.recap-grid .n{font-family:var(--serif);font-size:30px;font-weight:600;line-height:1}
+.recap-grid .l{font-size:12.5px;opacity:.78;margin-top:5px}
+
+/* ============ mobile tabbar ============ */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:35;display:none;background:rgba(251,246,236,.95);
+  backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+}
+.tabbar-in{display:flex;align-items:center;justify-content:space-around;max-width:520px;margin:0 auto}
+.tabbar button{display:grid;justify-items:center;gap:3px;font-size:10.5px;color:var(--muted);font-weight:600;padding:4px 8px}
+.tabbar button .e{font-size:19px}
+.tabbar button[aria-current="page"]{color:var(--green)}
+.plus{width:52px;height:52px;border-radius:50%;background:var(--green);color:#FBF6EC;font-size:26px;
+  display:grid;place-items:center;box-shadow:0 10px 22px -8px rgba(47,93,78,.9);
+  transition:transform .35s var(--spring)}
+.plus:hover,.plus:active{transform:scale(1.08) rotate(90deg)}
+@media (max-width:860px){.tabbar{display:block}main{padding-bottom:150px}}
+.fab{position:fixed;right:26px;bottom:26px;z-index:34;background:var(--green);color:#FBF6EC;border-radius:999px;
+  padding:15px 24px;font-weight:600;font-size:15px;box-shadow:0 14px 30px -12px rgba(47,93,78,.95);
+  transition:transform .32s var(--spring)}
+.fab:hover{transform:translateY(-3px)}
+@media (max-width:860px){.fab{display:none}}
+
+/* ============ sheets & modals ============ */
+.veil{position:fixed;inset:0;z-index:50;background:rgba(33,29,24,.5);backdrop-filter:blur(3px);
+  display:none;align-items:flex-end;justify-content:center;overflow-y:auto}
+.veil.on{display:flex;animation:fade .25s ease}
+@media (min-width:760px){.veil{align-items:center;padding:24px}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{
+  background:var(--paper);width:min(680px,100%);border-radius:22px 22px 0 0;padding:0 0 26px;max-height:94vh;overflow-y:auto;
+  animation:up .42s var(--ease);position:relative
+}
+@media (min-width:760px){.sheet{border-radius:20px}}
+@keyframes up{from{opacity:0;transform:translateY(50px)}to{opacity:1;transform:none}}
+.sheet-head{position:sticky;top:0;background:var(--paper);z-index:2;padding:20px 24px 14px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:12px}
+.sheet-head h3{font-size:19px}
+.sheet-head .x{margin-left:auto;font-size:26px;line-height:1;color:var(--muted)}
+.sheet-body{padding:22px 24px 0}
+.grab{width:44px;height:5px;background:var(--line);border-radius:99px;margin:9px auto -4px}
+.pickrow{display:grid;gap:10px}
+.bigpick{display:flex;align-items:center;gap:14px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;
+  padding:16px 18px;text-align:left;transition:transform .3s var(--spring),border-color .2s,background .2s}
+.bigpick:hover{transform:translateX(5px);border-color:var(--green)}
+.bigpick .e{font-size:23px}
+.bigpick .n{font-weight:700;font-size:15px}
+.bigpick .d{font-size:12.5px;color:var(--muted);margin-top:2px}
+label.f{display:grid;gap:7px;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:16px}
+input.i,textarea.i,select.i{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;
+  width:100%;font-size:15px;transition:border-color .2s,box-shadow .2s}
+input.i:focus,textarea.i:focus,select.i:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 4px rgba(47,93,78,.13)}
+textarea.i{min-height:132px;resize:vertical;font-family:var(--serif);font-size:16.5px;line-height:1.6}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:560px){.two{grid-template-columns:1fr}}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font-size:13.5px;color:var(--ink-2);
+  transition:transform .26s var(--spring),background .2s,color .2s,border-color .2s}
+.chip:hover{transform:translateY(-2px)}
+.chip[aria-pressed="true"]{background:var(--green);color:#FBF6EC;border-color:var(--green)}
+.chip.brass[aria-pressed="true"]{background:var(--brass);border-color:var(--brass)}
+.starpick{display:flex;gap:7px}
+.starpick button{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);
+  transition:transform .26s var(--spring),background .2s}
+.starpick button[aria-pressed="true"]{background:var(--brass);border-color:var(--brass);transform:scale(1.1) rotate(-6deg)}
+.slider{width:100%;accent-color:var(--green)}
+.switch{display:flex;align-items:center;gap:11px;background:var(--card);border:1.5px solid var(--line);
+  border-radius:12px;padding:13px 15px;margin-bottom:14px;cursor:pointer}
+.switch input{width:auto;accent-color:var(--green)}
+.switch .n{font-size:14px;font-weight:600}
+.switch .d{font-size:12.5px;color:var(--muted)}
+.sheet-foot{position:sticky;bottom:0;background:linear-gradient(transparent,var(--paper) 30%);padding:18px 24px 6px;display:flex;gap:10px}
+.sheet-foot .btn{flex:1}
+.help{font-size:12.5px;color:var(--muted);line-height:1.6;margin:0 0 14px}
+
+/* onboarding */
+.boot{position:fixed;inset:0;z-index:70;background:var(--paper);display:grid;place-items:center;padding:24px}
+.boot.gone{animation:bootOut .6s var(--ease) forwards}
+@keyframes bootOut{to{opacity:0;transform:scale(1.05);visibility:hidden}}
+.bookopen{width:130px;height:96px;margin:0 auto 26px;position:relative;perspective:700px}
+.bookopen .leaf{position:absolute;top:0;width:50%;height:100%;background:var(--card);border:1px solid var(--line)}
+.bookopen .l{left:0;transform-origin:right center;border-radius:5px 0 0 5px;animation:openL 1.3s var(--ease) forwards}
+.bookopen .r{right:0;transform-origin:left center;border-radius:0 5px 5px 0;animation:openR 1.3s var(--ease) forwards}
+@keyframes openL{from{transform:rotateY(72deg)}to{transform:none}}
+@keyframes openR{from{transform:rotateY(-72deg)}to{transform:none}}
+.step{max-width:520px;width:100%;text-align:center;animation:stepIn .45s var(--ease)}
+@keyframes stepIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.step h2{font-size:clamp(26px,6vw,36px);line-height:1.12;margin-bottom:10px}
+.step p.sub{color:var(--ink-2);margin:0 0 26px;font-size:15.5px;line-height:1.55}
+.avgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:9px;margin-bottom:24px}
+.avgrid button{aspect-ratio:1;border-radius:50%;border:1.5px solid var(--line);background:var(--card);font-size:25px;
+  transition:transform .28s var(--spring),border-color .2s,background .2s}
+.avgrid button:hover{transform:scale(1.12)}
+.avgrid button[aria-pressed="true"]{background:var(--green-soft);border-color:var(--green);transform:scale(1.14)}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:24px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.3s}
+.dots i.on{background:var(--green);width:20px;border-radius:99px}
+
+/* celebration + floaters */
+.spark{position:fixed;z-index:90;pointer-events:none;font-size:20px;animation:floatUp 1.25s var(--ease) forwards}
+@keyframes floatUp{to{transform:translate(var(--dx),-150px) rotate(var(--dr)) scale(.7);opacity:0}}
+.cheer{position:fixed;inset:0;z-index:88;display:grid;place-items:center;pointer-events:none}
+.cheer .box{background:var(--green);color:#F7F1E6;padding:26px 38px;border-radius:20px;text-align:center;
+  animation:popin .6s var(--spring);box-shadow:0 30px 60px -20px rgba(33,29,24,.7)}
+.cheer h2{color:#F7F1E6;font-size:26px}
+.cheer p{margin:6px 0 0;font-size:14px;opacity:.86}
+.toast{position:fixed;left:50%;bottom:96px;z-index:95;transform:translate(-50%,150px);background:var(--ink);color:var(--paper);
+  padding:13px 24px;border-radius:999px;font-size:14.5px;font-weight:500;transition:transform .45s var(--spring);max-width:90vw;text-align:center}
+.toast.on{transform:translate(-50%,0)}
+@media (min-width:861px){.toast{bottom:30px}}
+.pal{position:absolute;bottom:calc(100% + 8px);left:0;background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:9px;display:flex;gap:4px;flex-wrap:wrap;width:236px;z-index:5;box-shadow:0 18px 34px -18px rgba(33,29,24,.8);
+  animation:popin .3s var(--spring)}
+.pal button{width:36px;height:36px;border-radius:9px;font-size:18px;transition:transform .22s var(--spring)}
+.pal button:hover{transform:scale(1.2);background:var(--card-2)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+/* ===== added for accounts, roles and the owner console ===== */
+.pfoot .cbtn{margin-left:0}
+.pspace{flex:1 1 auto}
+.cbtn.danger{color:var(--oxblood)}
+.cbtn.danger:hover{color:#6B2417}
+.banner{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--green-soft);
+  border:1px solid #C3D6CB;border-radius:14px;padding:14px 18px;margin-bottom:20px;font-size:14.5px;color:var(--green-2)}
+.ping{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--oxblood);vertical-align:middle;margin-left:2px}
+.tagrole{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.02em;padding:3px 10px;border-radius:999px;
+  background:var(--card-2);border:1px solid var(--line);color:var(--ink-2)}
+.tagrole.owner{background:var(--brass);border-color:var(--brass);color:#2A2008}
+.tagrole.moderator{background:var(--green-soft);border-color:#C3D6CB;color:var(--green-2)}
+.tagrole.blocked{background:#F2DED9;border-color:#E3C3BB;color:var(--oxblood)}
+.mrow{display:grid;grid-template-columns:42px 1fr auto;gap:13px;align-items:center;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:13px 16px;margin-bottom:10px}
+.mrow .av{width:42px;height:42px;border-radius:50%;background:var(--green-soft);display:grid;place-items:center;font-size:20px}
+.mrow .nm{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mrow .sub{font-size:12.5px;color:var(--muted);margin-top:2px;word-break:break-all}
+.mact{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:620px){.mrow{grid-template-columns:42px 1fr}.mact{grid-column:1/-1;justify-content:flex-start;margin-top:4px}}
+.setbox{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.danger-zone{margin-top:46px;border:1px dashed #DDBCB4;border-radius:var(--r);padding:22px;background:#FBF1EE}
+.danger-zone h3{font-size:17px;color:var(--oxblood);margin-bottom:6px}
+.danger-zone p{font-size:13.5px;color:var(--ink-2);line-height:1.65;margin:0 0 14px;max-width:60ch}
+.danger-btn{border-color:#DDBCB4;color:var(--oxblood)}
+.danger-btn:hover{background:var(--oxblood);color:#FBF6EC;border-color:var(--oxblood)}
+.boot .step .i{max-width:340px;margin-left:auto;margin-right:auto}
+.boot .step .btn{max-width:340px;margin-left:auto;margin-right:auto;display:block}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<header class="chrome" id="chrome" hidden>
+  <div class="chrome-in">
+    <div class="brand"><span class="bk">📚</span> Between the Pages</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="chrome-right">
+      <button class="icon-btn" data-act="invite" title="Invite friends" aria-label="Invite friends">🔗</button>
+      <button class="me-btn" data-act="go" data-view="me"><span class="av" id="meAv">🦊</span><span id="meName">You</span></button>
+    </div>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<button class="fab" data-act="compose">＋ Share something</button>
+
+<nav class="tabbar" id="tabbar" hidden>
+  <div class="tabbar-in">
+    <button data-act="go" data-view="home"><span class="e">🏠</span>Home</button>
+    <button data-act="go" data-view="books"><span class="e">📚</span>Books</button>
+    <button class="plus" data-act="compose" aria-label="Share something">＋</button>
+    <button data-act="go" data-view="activity"><span class="e">✨</span>Activity</button>
+    <button data-act="go" data-view="me"><span class="e">👤</span>Me</button>
+  </div>
+</nav>
+
+<div class="veil" id="veil"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<div class="boot" id="boot"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   BETWEEN THE PAGES
+   Fill in these two values from your Supabase project:
+   Dashboard → Project Settings → Data API
+   ═══════════════════════════════════════════════════════════ */
+const SUPABASE_URL      = 'https://evruiuqvozynyipmnojy.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'sb_publishable_YYh_Zk27wHh0sEtvMkcnYA_Z7xi8-KR';
+/* The owner is whoever signs in with this address. It is set in the
+   database too (owner_email() in supabase-setup.sql) — change it in
+   BOTH places if it ever needs to change. */
+const OWNER_EMAIL = 'mazvitamupunga@gmail.com';
+/* ═══════════════════════════════════════════════════════════ */
+
+const GENRES=[
+ {id:'literary',n:'Literary Fiction',e:'📚',g:'Fiction'},
+ {id:'romance',n:'Romance',e:'💘',g:'Fiction'},
+ {id:'comedy',n:'Comedy',e:'😂',g:'Fiction'},
+ {id:'mystery',n:'Mystery',e:'🕵️',g:'Fiction'},
+ {id:'thriller',n:'Thriller',e:'😱',g:'Fiction'},
+ {id:'horror',n:'Horror',e:'👻',g:'Fiction'},
+ {id:'fantasy',n:'Fantasy',e:'🧙',g:'Fiction'},
+ {id:'scifi',n:'Science Fiction',e:'🚀',g:'Fiction'},
+ {id:'historical',n:'Historical Fiction',e:'🏛',g:'Fiction'},
+ {id:'psychology',n:'Psychology',e:'🧠',g:'Non-fiction'},
+ {id:'finance',n:'Finance',e:'💰',g:'Non-fiction'},
+ {id:'business',n:'Business',e:'📈',g:'Non-fiction'},
+ {id:'history',n:'History',e:'🌍',g:'Non-fiction'},
+ {id:'art',n:'Art & Culture',e:'🎨',g:'Non-fiction'},
+ {id:'self',n:'Self-development',e:'🧘',g:'Non-fiction'},
+ {id:'science',n:'Science',e:'🔬',g:'Non-fiction'},
+ {id:'travel',n:'Travel',e:'✈️',g:'Non-fiction'},
+ {id:'memoir',n:'Memoir & Biography',e:'📝',g:'Non-fiction'}
+];
+const AVATARS=['🦊','🐻','🌙','🦉','🐸','📚','🌿','☕','🕯','🐙','🦆','🍄','🪐','🐝','🦕','🫖','🎈','🧦','🐨','🦔'];
+const REACTIONS=[
+ {k:'❤️',l:'Loved it'},{k:'😭',l:"I'm crying"},{k:'😂',l:"I'm dying"},
+ {k:'😱',l:'WHAT'},{k:'🤯',l:'Mind blown'},{k:'😤',l:"I'm angry"},
+ {k:'👀',l:'Interesting…'},{k:'🫶',l:'Same'},{k:'📚',l:'Adding to my list'}];
+const MOODS=['🥹 Emotional','😂 Funny','😱 Terrifying','❤️ Romantic','🧠 Thought-provoking','😤 Frustrating','✨ Magical','😭 Destroyed me'];
+const RECS=[{v:'yes',l:'❤️ Absolutely'},{v:'probably',l:'👍 Probably'},{v:'maybe',l:'🤔 Maybe'},{v:'no',l:'👎 No'}];
+const DNF_REASONS=['😴 Too slow','😤 Annoying','😐 Not for me','🥱 Boring','📚 Life happened','🤷 Don\'t know'];
+const STATUSES={reading:{l:'🟡 Reading'},finished:{l:'🟢 Finished'},want:{l:'🔵 Want to read'},dnf:{l:'🔴 DNF'}};
+const PALETTE=[['#2F5D4E','#1B3A30'],['#8A3324','#5A2016'],['#37617E','#224054'],['#57436E','#362A45'],
+ ['#8A6A1F','#5C4512'],['#215A55','#123734'],['#7A3B5C','#4E2239'],['#3F5B2E','#27391C'],['#8C4A24','#5A2D13']];
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ══════════════════════ state ══════════════════════ */
+let S={members:[],books:[],shelves:{},posts:[],meta:{name:'Between the Pages',rooms:[],allowAnon:true},emails:{},reports:[]};
+let me=null, session=null, view={name:'home'}, draft={}, shelfTab='reading', channel=null, refreshTimer=null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hash=s=>{let h=0;for(let i=0;i<String(s).length;i++)h=(h*31+String(s).charCodeAt(i))>>>0;return h};
+const calm=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ago=ts=>{const m=(Date.now()-ts)/60000;if(m<1)return'just now';if(m<60)return Math.floor(m)+'m ago';
+  if(m<1440)return Math.floor(m/60)+'h ago';if(m<10080)return Math.floor(m/1440)+'d ago';return new Date(ts).toLocaleDateString()};
+const rooms=()=>GENRES.concat(S.meta.rooms||[]);
+const room=id=>rooms().find(r=>r.id===id)||{id,n:'Elsewhere',e:'📖',g:'Fiction'};
+const book=id=>S.books.find(b=>b.id===id);
+const member=id=>S.members.find(m=>m.id===id)||{id,alias:'Someone',avatar:'📖'};
+const myShelf=()=>S.shelves[me?.id]||{};
+const entry=(u,b)=>(S.shelves[u]||{})[b];
+const postsFor=b=>S.posts.filter(p=>p.bookId===b&&p.type!=='comment');
+const reviewsFor=b=>S.posts.filter(p=>p.bookId===b&&p.type==='review'&&p.rating);
+const ratingFor=b=>{const r=reviewsFor(b);return r.length?(r.reduce((a,p)=>a+p.rating,0)/r.length):0};
+const readersFor=b=>S.members.filter(m=>entry(m.id,b));
+const identity=p=>(p.anon||!p.userId)?{alias:'Anonymous Reader',avatar:'🕵️'}:member(p.userId);
+const cols=s=>PALETTE[hash(s)%PALETTE.length];
+const isStaff=()=>['owner','moderator'].includes(me?.role);
+const isOwner=()=>me?.role==='owner';
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),3400)}
+function chk(res,msg){ if(res&&res.error){ console.error(res.error); toast(msg||res.error.message||'That didn\'t save.'); return false } return true }
+
+/* ══════════════════════ data ══════════════════════ */
+async function loadAll(){
+  const q=[
+    sb.from('profiles').select('*'),
+    sb.from('books').select('*'),
+    sb.from('shelf').select('*'),
+    sb.from('posts').select('*'),
+    sb.from('reactions').select('*'),
+    sb.from('votes').select('*'),
+    sb.from('rooms').select('*'),
+    sb.from('club').select('*').eq('id',1).maybeSingle()
+  ];
+  if(isStaff()){ q.push(sb.from('member_emails').select('*')); q.push(sb.from('reports').select('*')) }
+  const [pf,bk,sh,po,rx,vt,rm,cl,em,rp]=await Promise.all(q);
+
+  S.members=(pf.data||[]).map(p=>({id:p.id,alias:p.alias,avatar:p.avatar,bio:p.bio||'',role:p.role,
+    joinedAt:+new Date(p.joined_at)}));
+  S.books=(bk.data||[]).map(b=>({id:b.id,title:b.title,author:b.author||'',genre:b.genre,
+    addedBy:b.added_by,createdAt:+new Date(b.created_at)}));
+  S.shelves={};
+  (sh.data||[]).forEach(r=>{ (S.shelves[r.user_id]=S.shelves[r.user_id]||{})[r.book_id]=
+    {status:r.status,progress:r.progress||0,dnfReason:r.dnf_reason||'',fav:!!r.fav,updatedAt:+new Date(r.updated_at)} });
+  S.posts=(po.data||[]).map(p=>({id:p.id,type:p.type,bookId:p.book_id,parentId:p.parent_id,userId:p.user_id,
+    anon:!!p.anon,text:p.body||'',rating:p.rating||0,recommend:p.recommend||'',moods:p.moods||[],
+    quote:p.quote||'',character:p.fav_character||'',spoiler:!!p.spoiler,atProgress:p.at_progress||0,
+    createdAt:+new Date(p.created_at),reactions:{},votes:{agree:[],no:[]}}));
+  const idx=Object.fromEntries(S.posts.map(p=>[p.id,p]));
+  (rx.data||[]).forEach(r=>{const p=idx[r.post_id]; if(p)(p.reactions[r.emoji]=p.reactions[r.emoji]||[]).push(r.user_id)});
+  (vt.data||[]).forEach(v=>{const p=idx[v.post_id]; if(p&&p.votes[v.choice])p.votes[v.choice].push(v.user_id)});
+  S.meta={name:cl.data?.name||'Between the Pages',
+    rooms:(rm.data||[]).map(r=>({id:r.id,n:r.name,e:r.emoji,g:'Yours'})),
+    allowAnon:cl.data?cl.data.allow_anon!==false:true};
+  S.emails={}; (em?.data||[]).forEach(r=>S.emails[r.id]=r.email);
+  S.reports=(rp?.data||[]);
+  const mine=(pf.data||[]).find(p=>p.id===me?.id);
+  if(mine) me={...me,alias:mine.alias,avatar:mine.avatar,bio:mine.bio||'',role:mine.role};
+}
+function subscribe(){
+  if(channel) return;
+  channel=sb.channel('club-live')
+    .on('postgres_changes',{event:'*',schema:'public'},()=>{
+      clearTimeout(refreshTimer);
+      refreshTimer=setTimeout(async()=>{ await loadAll(); if(me) render() },500);
+    }).subscribe();
+}
+async function refresh(){ await loadAll(); render() }
+
+/* ══════════════════════ components ══════════════════════ */
+function coverHTML(b,cls=''){
+  const [c1,c2]=cols(b.title+b.author);
+  return `<div class="cover ${cls}" style="--c1:${c1};--c2:${c2}">
+    <div class="ct">${esc(b.title)}</div><div class="ca">${esc(b.author||'Unknown')}</div>
+    <span class="glyph">${room(b.genre).e}</span></div>`;
+}
+const starsHTML=n=>`<span class="stars">${[1,2,3,4,5].map(i=>`<i class="${i<=Math.round(n)?'on':''}"></i>`).join('')}</span>`;
+const barHTML=p=>`<div class="bar"><i style="width:${Math.max(0,Math.min(100,p||0))}%"></i></div>`;
+const avHTML=(m,cls='av')=>`<span class="${cls}">${m.avatar||'📖'}</span>`;
+
+function bookCardHTML(b){
+  const rt=ratingFor(b.id), rd=readersFor(b.id).length, th=postsFor(b.id).length;
+  return `<button class="bcard" data-act="book" data-id="${b.id}">
+    <div class="inner">${coverHTML(b)}</div>
+    <h3>${esc(b.title)}</h3><p class="auth">${esc(b.author||'Unknown author')}</p>
+    <div class="stat">${rt?`${starsHTML(rt)} ${rt.toFixed(1)}`:'<span style="color:var(--muted)">no ratings yet</span>'}
+      ${th?`<span>💬 ${th}</span>`:''}</div>
+    ${rd?`<div class="who">${rd} ${rd===1?'person is':'people are'} on this</div>`:''}</button>`;
+}
+function reactionsHTML(p){
+  const has=Object.entries(p.reactions||{}).filter(([,v])=>v.length);
+  const replies=S.posts.filter(c=>c.parentId===p.id).length;
+  return `<div class="pfoot">
+    ${has.map(([k,v])=>`<button class="rchip ${v.includes(me.id)?'mine':''}" data-act="react" data-id="${p.id}" data-k="${k}">${k}<span class="c">${v.length}</span></button>`).join('')}
+    <span style="position:relative"><button class="addr" data-act="palette" data-id="${p.id}">＋ react</button></span>
+    <span class="pspace"></span>
+    ${p.userId&&p.userId!==me.id?`<button class="cbtn" data-act="report" data-id="${p.id}">Report</button>`:''}
+    ${(isStaff()||p.userId===me.id)?`<button class="cbtn danger" data-act="rmpost" data-id="${p.id}">${p.userId===me.id?'Delete':'Remove'}</button>`:''}
+    <button class="cbtn" data-act="thread" data-id="${p.id}">💬 ${replies||'reply'}</button>
+  </div>
+  <div class="thread" id="th-${p.id}">
+    ${S.posts.filter(c=>c.parentId===p.id).sort((a,b)=>a.createdAt-b.createdAt).map(c=>{
+      const who=identity(c);
+      return `<div class="cmt">${avHTML(who)}<div><b>${esc(who.alias)}</b><span class="t">${ago(c.createdAt)}</span>
+        ${(isStaff()||c.userId===me.id)?`<button class="cbtn danger" data-act="rmpost" data-id="${c.id}" style="font-size:11px;margin-left:8px">delete</button>`:''}
+        <br>${esc(c.text)}</div></div>`}).join('')}
+    <form class="cform" data-act="comment" data-id="${p.id}">
+      <input placeholder="Say something…" maxlength="400" required aria-label="Write a reply">
+      <button class="btn small primary" type="submit">Reply</button></form>
+  </div>`;
+}
+function gated(p){
+  if(!p.bookId||p.userId===me.id) return false;
+  const mine=entry(me.id,p.bookId);
+  const myP=mine?(mine.status==='finished'?100:(mine.progress||0)):0;
+  if(p.spoiler) return myP<100;
+  if(typeof p.atProgress==='number'&&p.atProgress-myP>18) return true;
+  return false;
+}
+function hotTakeHTML(p){
+  const a=(p.votes?.agree||[]).length,d=(p.votes?.no||[]).length,t=a+d;
+  const mA=(p.votes?.agree||[]).includes(me.id),mD=(p.votes?.no||[]).includes(me.id);
+  return `<p class="q serif" style="font-size:19px;line-height:1.4;margin:6px 0 14px">🔥 ${esc(p.text)}</p>
+   <div class="votes">
+     <button class="vb ${mA?'on agree':''}" data-act="vote" data-id="${p.id}" data-v="agree">Agree</button>
+     <button class="vb ${mD?'on':''}" data-act="vote" data-id="${p.id}" data-v="no">Absolutely not</button>
+     ${t?`<span style="font-size:13px;color:var(--muted)">${t} ${t===1?'vote':'votes'}</span>`:'<span style="font-size:13px;color:var(--muted)">be the first to weigh in</span>'}
+   </div>
+   ${t?`<div class="tally"><i class="a" style="width:${a/t*100}%"></i><i class="d" style="width:${d/t*100}%"></i></div>
+     <div class="tally-lab"><span>${Math.round(a/t*100)}% agree</span><span>${Math.round(d/t*100)}% absolutely not</span></div>`:''}`;
+}
+function postHTML(p,opts={}){
+  const who=identity(p), b=p.bookId?book(p.bookId):null;
+  const kind={review:'Review',thought:'Thought',update:'Reading update',hottake:'Hot take'}[p.type]||'';
+  const kcls=p.type==='hottake'?'hot':p.type==='update'?'upd':'';
+  const lock=gated(p);
+  let body='';
+  if(p.type==='review'){
+    body=`${p.rating?`<div class="rating-line">${starsHTML(p.rating)} <b>${p.rating}/5</b>
+      ${p.recommend?`<span class="rec">· ${RECS.find(r=>r.v===p.recommend)?.l||''}</span>`:''}</div>`:''}
+      ${p.text?`<p class="ptext">${esc(p.text)}</p>`:''}
+      ${p.quote?`<blockquote class="quote">“${esc(p.quote)}”</blockquote>`:''}
+      ${p.character?`<p class="ptext" style="font-size:14px;color:var(--ink-2)">Favourite character: <b>${esc(p.character)}</b></p>`:''}
+      ${(p.moods||[]).length?`<div class="moods">${p.moods.map(m=>`<span class="mood">${esc(m)}</span>`).join('')}</div>`:''}`;
+  } else if(p.type==='update'){
+    body=`<div class="bar-row" style="margin:10px 0 6px"><span class="pc">${p.atProgress}%</span>${barHTML(p.atProgress)}</div>
+      ${p.text?`<p class="ptext">${esc(p.text)}</p>`:''}`;
+  } else if(p.type==='hottake'){ body=hotTakeHTML(p) }
+  else { body=`<p class="ptext">${esc(p.text)}</p>` }
+  return `<article class="post ${p.userId===me.id?'mine':''}" id="p-${p.id}">
+    <div class="phead">${avHTML(who)}
+      <div><div class="nm">${esc(who.alias)}</div><div class="sub">${ago(p.createdAt)}${b&&!opts.hideBook?' · '+esc(room(b.genre).n):''}</div></div>
+      ${kind?`<span class="kind ${kcls}">${kind}</span>`:''}</div>
+    ${b&&!opts.hideBook?`<p class="ptitle"><a href="#" data-act="book" data-id="${b.id}">${esc(b.title)}</a>${b.author?` <span style="font-weight:400;color:var(--muted);font-size:14px">· ${esc(b.author)}</span>`:''}</p>`:''}
+    ${lock?`<div class="locked">
+        <p>🔒 <b>${esc(who.alias)}</b> ${p.spoiler?'marked this as a spoiler.':`was ${p.atProgress}% in when they wrote this — you're further back.`}</p>
+        <button class="btn small" data-act="unlock" data-id="${p.id}">Show it anyway</button></div>
+      <div hidden id="hidden-${p.id}">${body}</div>`:body}
+    ${reactionsHTML(p)}</article>`;
+}
+const emptyHTML=(e,msg,btn,act)=>`<div class="empty"><span class="e">${e}</span><p>${msg}</p>${btn?`<button class="btn primary" data-act="${act}">${btn}</button>`:''}</div>`;
+
+/* ══════════════════════ views ══════════════════════ */
+function vHome(){
+  const h=new Date().getHours(), hi=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+  const shelf=myShelf();
+  const reading=Object.entries(shelf).filter(([,v])=>v.status==='reading')
+    .sort((a,b)=>(b[1].updatedAt||0)-(a[1].updatedAt||0)).map(([k,v])=>({b:book(k),v})).filter(x=>x.b);
+  const cur=reading[0];
+  const recent=S.posts.filter(p=>p.type!=='comment').sort((a,b)=>b.createdAt-a.createdAt).slice(0,6);
+  const talked=S.books.map(b=>({b,n:postsFor(b.id).length+readersFor(b.id).length})).filter(x=>x.n>0)
+    .sort((a,b)=>b.n-a.n).slice(0,4);
+  const week=Date.now()-6048e5;
+  let fin=0; S.members.forEach(m=>Object.values(S.shelves[m.id]||{}).forEach(e=>{if(e.status==='finished'&&(e.updatedAt||0)>week)fin++}));
+  const revs=S.posts.filter(p=>p.type==='review'&&p.createdAt>week).length;
+  const talk=S.posts.filter(p=>p.createdAt>week).length;
+  const loved=S.books.map(b=>({b,r:ratingFor(b.id)})).filter(x=>x.r).sort((a,b)=>b.r-a.r)[0];
+  const pend=isStaff()?S.members.filter(m=>m.role==='pending').length:0;
+
+  return `<div class="view">
+    ${pend?`<div class="banner"><b>${pend} ${pend===1?'person is':'people are'} waiting to be let in.</b>
+      <button class="btn small primary" data-act="go" data-view="club">Review them</button></div>`:''}
+    <p class="greet-sub">${hi}, ${esc(me.alias)} ${me.avatar}</p>
+    <h1 class="greet">What are you reading today?</h1>
+    ${cur?`<div class="now"><div>${coverHTML(cur.b)}</div><div>
+        <div style="font-size:11.5px;font-weight:700;color:var(--brass);margin-bottom:6px">Currently reading</div>
+        <h3>${esc(cur.b.title)}</h3><p class="auth">${esc(cur.b.author||'Unknown author')}</p>
+        <div class="bar-row">${barHTML(cur.v.progress)}<span class="pc">${cur.v.progress||0}%</span></div>
+        <div class="row-btns">
+          <button class="btn primary" data-act="progress" data-id="${cur.b.id}">Update progress</button>
+          <button class="btn" data-act="compose" data-type="thought" data-book="${cur.b.id}">Write a thought</button>
+          <button class="btn ghost" data-act="book" data-id="${cur.b.id}">Open book</button></div></div></div>`
+      :`<div style="margin-top:22px">${emptyHTML('📖',"Nothing on your nightstand yet.<br>Someone has to read the first book 👀",'Add a book','addbook')}</div>`}
+    ${reading.length>1?`<div class="section"><div class="sec-head"><h2>Also on your nightstand</h2></div>
+      <div class="grid">${reading.slice(1).map(x=>bookCardHTML(x.b)).join('')}</div></div>`:''}
+    ${talked.length?`<div class="section"><div class="sec-head"><h2>🔥 Everyone's talking about</h2>
+      <button class="more" data-act="go" data-view="books">All books</button></div>
+      <div class="grid">${talked.map(x=>bookCardHTML(x.b)).join('')}</div></div>`:''}
+    <div class="section"><div class="sec-head"><h2>💭 Recent thoughts</h2>
+      <button class="more" data-act="go" data-view="activity">All activity</button></div>
+      ${recent.length?recent.map(p=>postHTML(p)).join(''):emptyHTML('🤫',"It's suspiciously quiet in here…",'Start the conversation','compose')}</div>
+    ${S.posts.length?`<div class="section"><div class="recap">
+      <h2>This week in the reading room</h2><div class="sm">Updates itself — nobody has to write it.</div>
+      <div class="recap-grid">
+        <div><div class="n">${fin}</div><div class="l">books finished</div></div>
+        <div><div class="n">${revs}</div><div class="l">reviews posted</div></div>
+        <div><div class="n">${talk}</div><div class="l">things said</div></div>
+        <div><div class="n">${S.members.filter(m=>m.role!=='pending'&&m.role!=='blocked').length}</div><div class="l">people in the room</div></div></div>
+      ${loved?`<div style="margin-top:22px;position:relative;z-index:1;font-size:14px">Club favourite so far ·
+        <b class="serif" style="font-size:16px">${esc(loved.b.title)}</b> ${starsHTML(loved.r)} ${loved.r.toFixed(1)}</div>`:''}
+    </div></div>`:''}
+    <div class="section"><div class="sec-head"><h2>📚 Explore rooms</h2>
+      <button class="more" data-act="go" data-view="rooms">See all</button></div>
+      <div class="chips">${rooms().slice(0,10).map(r=>{const n=S.books.filter(b=>b.genre===r.id).length;
+        return `<button class="chip" data-act="room" data-id="${r.id}">${r.e} ${r.n}${n?` · ${n}`:''}</button>`}).join('')}</div></div>
+  </div>`;
+}
+function vBooks(g){
+  const q=(draft.q||'').toLowerCase();
+  let list=S.books.slice().sort((a,b)=>b.createdAt-a.createdAt);
+  if(g) list=list.filter(b=>b.genre===g);
+  if(q) list=list.filter(b=>(b.title+' '+b.author).toLowerCase().includes(q));
+  const dnf=[];
+  S.members.forEach(m=>Object.entries(S.shelves[m.id]||{}).forEach(([bid,e])=>{if(e.status==='dnf'&&book(bid))dnf.push({m,b:book(bid),e})}));
+  const r=g?room(g):null;
+  return `<div class="view">
+    <div class="sec-head" style="margin-bottom:18px"><h2 style="font-size:27px">${r?`${r.e} ${esc(r.n)}`:'Our library'}</h2>
+      <span class="hint">${list.length} ${list.length===1?'book':'books'}</span>
+      <button class="more" data-act="addbook">＋ Add a book</button></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">
+      <input class="i" id="q" placeholder="Search titles and authors…" value="${esc(draft.q||'')}" style="max-width:280px">
+      <button class="btn small ${draft.shelfview?'':'primary'}" data-act="viewmode" data-m="grid">Grid</button>
+      <button class="btn small ${draft.shelfview?'primary':''}" data-act="viewmode" data-m="shelf">Shelf</button>
+      ${g?`<button class="btn small ghost" data-act="go" data-view="books">Clear room</button>`:''}</div>
+    ${!g?`<div class="chips" style="margin-bottom:22px">${rooms().map(rr=>{const n=S.books.filter(b=>b.genre===rr.id).length;
+      return n?`<button class="chip" data-act="room" data-id="${rr.id}">${rr.e} ${rr.n} · ${n}</button>`:''}).join('')}</div>`:''}
+    ${list.length?(draft.shelfview
+      ?`<div class="shelfview"><div class="shelfrow">${list.map(b=>{const [c1]=cols(b.title+b.author);
+        return `<button class="spine" data-act="book" data-id="${b.id}" style="--w:${30+hash(b.id)%16}px;--h:${118+hash(b.title)%64}px;--c1:${c1}"><span>${esc(b.title)}</span></button>`}).join('')}</div><div class="plank"></div></div>`
+      :`<div class="grid">${list.map(bookCardHTML).join('')}</div>`)
+      :emptyHTML('📚',q?'Nothing matches that search.':'No books in here yet.<br>Someone has to read the first one 👀','Add a book','addbook')}
+    ${(!g&&dnf.length)?`<div class="section"><div class="sec-head"><h2>🚪 The DNF wall</h2>
+      <span class="hint">Life is too short to finish books you hate.</span></div>
+      <div class="grid">${dnf.slice(0,8).map(x=>`<div class="bcard"><div class="inner">${coverHTML(x.b)}</div>
+        <h3>${esc(x.b.title)}</h3><p class="auth">DNF at ${x.e.progress||0}% · ${esc(x.m.alias)}</p>
+        ${x.e.dnfReason?`<div class="who" style="color:var(--oxblood)">${esc(x.e.dnfReason)}</div>`:''}</div>`).join('')}</div></div>`:''}
+  </div>`;
+}
+function vBook(id){
+  const b=book(id); if(!b) return `<div class="view">${emptyHTML('🤔','That book has wandered off the shelf.','Back to books','go')}</div>`;
+  const rt=ratingFor(id), posts=postsFor(id).sort((a,b)=>b.createdAt-a.createdAt), mine=entry(me.id,id)||{};
+  const readers=readersFor(id).map(m=>({m,e:entry(m.id,id)}))
+    .sort((a,b)=>(b.e.status==='finished'?101:b.e.progress||0)-(a.e.status==='finished'?101:a.e.progress||0));
+  return `<div class="view">
+    <button class="btn small ghost" data-act="back" style="margin-bottom:16px">← Back</button>
+    <div class="bhead"><div>${coverHTML(b)}</div><div>
+      <h1>${esc(b.title)}</h1><p class="auth">${esc(b.author||'Unknown author')}</p>
+      <div class="pills">
+        <button class="pill b" data-act="room" data-id="${b.genre}">${room(b.genre).e} ${room(b.genre).n}</button>
+        ${rt?`<span class="pill">${starsHTML(rt)} ${rt.toFixed(1)} · ${reviewsFor(id).length} ${reviewsFor(id).length===1?'rating':'ratings'}</span>`:'<span class="pill">no ratings yet</span>'}
+        <span class="pill">👥 ${readers.length} ${readers.length===1?'reader':'readers'}</span><span class="pill">💬 ${posts.length}</span>
+        ${isStaff()?`<button class="pill" data-act="rmbook" data-id="${id}" style="color:var(--oxblood)">Remove book</button>`:''}</div>
+      <div class="statusrow">${Object.entries(STATUSES).map(([k,v])=>
+        `<button class="st" data-s="${k}" data-act="status" data-id="${id}" aria-pressed="${mine.status===k}">${v.l}</button>`).join('')}</div>
+      ${mine.status==='reading'?`<div class="bar-row" style="margin-top:18px;max-width:380px">${barHTML(mine.progress)}
+        <span class="pc">${mine.progress||0}%</span><button class="btn small" data-act="progress" data-id="${id}">Update</button></div>`:''}
+      ${mine.status==='dnf'&&mine.dnfReason?`<p style="margin-top:14px;font-size:14px;color:var(--oxblood)">You gave up at ${mine.progress||0}% · ${esc(mine.dnfReason)}</p>`:''}
+    </div></div>
+    ${readers.length?`<div class="section"><div class="sec-head"><h2>👥 Who's reading this?</h2></div>
+      <div class="readers">${readers.map(({m,e})=>{const pc=e.status==='finished'?100:e.progress||0;
+        const lab=e.status==='finished'?'Finished':e.status==='want'?'Wants to':e.status==='dnf'?'DNF':pc+'%';
+        return `<div class="reader">${avHTML(m)}<div><div class="nm">${esc(m.alias)}${m.id===me.id?' (you)':''}</div>${barHTML(pc)}</div>
+          <div class="pc">${lab}</div></div>`}).join('')}</div></div>`:''}
+    <div class="section"><div class="sec-head"><h2>💬 Thoughts on this book</h2>
+      <button class="more" data-act="compose" data-book="${id}">＋ Add yours</button></div>
+      ${posts.length?posts.map(p=>postHTML(p,{hideBook:true})).join('')
+        :emptyHTML('💭','Nobody has said anything yet.<br>Go on, be the loud one.','Write the first thought','compose')}</div>
+  </div>`;
+}
+function vRooms(){
+  const takes=S.posts.filter(p=>p.type==='hottake').sort((a,b)=>b.createdAt-a.createdAt);
+  const tile=r=>{const n=S.books.filter(b=>b.genre===r.id).length;
+    return `<button class="room" data-act="room" data-id="${r.id}"><span class="e">${r.e}</span>
+      <div class="n">${esc(r.n)}</div><div class="c">${n?`${n} ${n===1?'book':'books'}`:'empty'}</div></button>`};
+  const byG=g=>rooms().filter(r=>r.g===g);
+  return `<div class="view">
+    <div class="sec-head" style="margin-bottom:6px"><h2 style="font-size:27px">The reading rooms</h2>
+      <button class="more" data-act="newroom">＋ Make a room</button></div>
+    <p class="help" style="max-width:60ch">Rooms keep conversations apart, so the fantasy talk doesn't drown out the memoirs. Make your own for whatever your group is actually like.</p>
+    <div class="group-lab">Fiction</div><div class="rooms">${byG('Fiction').map(tile).join('')}</div>
+    <div class="group-lab">Non-fiction</div><div class="rooms">${byG('Non-fiction').map(tile).join('')}</div>
+    ${byG('Yours').length?`<div class="group-lab">Made by the club</div><div class="rooms">${byG('Yours').map(tile).join('')}</div>`:''}
+    <div class="section"><div class="sec-head"><h2>🔥 Hot takes</h2><span class="hint">Say the thing. Let them vote.</span>
+      <button class="more" data-act="compose" data-type="hottake">＋ Post a take</button></div>
+      ${takes.length?takes.map(p=>{const who=identity(p);
+        return `<div class="take"><div class="phead">${avHTML(who)}
+          <div><div class="nm">${esc(who.alias)}</div><div class="sub">${ago(p.createdAt)}</div></div></div>
+          ${hotTakeHTML(p)}${reactionsHTML(p)}</div>`}).join('')
+        :emptyHTML('🔥','No takes yet. Somebody must have an unpopular opinion.','Post a hot take','compose')}</div>
+  </div>`;
+}
+function vActivity(){
+  const ev=[];
+  S.posts.filter(p=>p.type!=='comment').forEach(p=>{
+    const who=identity(p), b=p.bookId?book(p.bookId):null;
+    const verb={review:'reviewed',thought:'had a thought about',update:'made progress on',hottake:'dropped a hot take'}[p.type];
+    ev.push({t:p.createdAt,av:who.avatar,html:`<b>${esc(who.alias)}</b> ${verb} ${b?`<a href="#" data-act="book" data-id="${b.id}">${esc(b.title)}</a>`:''}
+      ${p.type==='hottake'?`<br><span style="color:var(--ink-2)">“${esc(p.text.slice(0,90))}${p.text.length>90?'…':''}”</span>`:''}`});
+  });
+  S.members.filter(m=>!['pending','blocked'].includes(m.role)).forEach(m=>{
+    ev.push({t:m.joinedAt,av:m.avatar,html:`<b>${esc(m.alias)}</b> joined the reading room`});
+    Object.entries(S.shelves[m.id]||{}).forEach(([bid,e])=>{const b=book(bid); if(!b||!e.updatedAt)return;
+      const verb={finished:'finished',reading:'started reading',want:'added to their list',dnf:'gave up on'}[e.status];
+      ev.push({t:e.updatedAt,av:m.avatar,html:`<b>${esc(m.alias)}</b> ${verb} <a href="#" data-act="book" data-id="${b.id}">${esc(b.title)}</a>`})});
+  });
+  S.books.forEach(b=>ev.push({t:b.createdAt,av:'📚',html:`<b>${esc(member(b.addedBy).alias)}</b> put <a href="#" data-act="book" data-id="${b.id}">${esc(b.title)}</a> on the shelf`}));
+  ev.sort((a,b)=>b.t-a.t);
+  return `<div class="view"><div class="sec-head" style="margin-bottom:10px"><h2 style="font-size:27px">What's been happening</h2></div>
+    ${ev.length?ev.slice(0,60).map(e=>`<div class="act"><span class="av">${e.av}</span><div>${e.html}<div class="t">${ago(e.t)}</div></div></div>`).join('')
+      :emptyHTML('🌙','Your bookshelf is peacefully silent.','Share something','compose')}</div>`;
+}
+function vMe(){
+  const shelf=myShelf(), ids=Object.entries(shelf);
+  const mineP=S.posts.filter(p=>p.userId===me.id&&p.type!=='comment');
+  const revs=mineP.filter(p=>p.type==='review'&&p.rating);
+  const avg=revs.length?(revs.reduce((a,p)=>a+p.rating,0)/revs.length).toFixed(1):'—';
+  const fin=ids.filter(([,v])=>v.status==='finished').length;
+  const tabs={reading:'Reading',want:'Want to read',finished:'Finished',dnf:'DNF',fav:'Favourites'};
+  const list=ids.filter(([,v])=>shelfTab==='fav'?v.fav:v.status===shelfTab).map(([k])=>book(k)).filter(Boolean);
+  const gc={}; ids.forEach(([k])=>{const b=book(k); if(b)gc[b.genre]=(gc[b.genre]||0)+1});
+  const top=Object.entries(gc).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([g])=>room(g).n);
+  const badges=[];
+  if(mineP.length>=1)badges.push('🏆 First review');
+  if(fin>=5)badges.push('📚 5 books finished');
+  if(fin>=10)badges.push('🔥 10 books finished');
+  if(Object.keys(gc).length>=4)badges.push('🌍 Genre explorer');
+  if(S.posts.filter(p=>p.type==='comment'&&p.userId===me.id).length>=3)badges.push('💬 Conversation starter');
+  if(ids.filter(([,v])=>v.status==='dnf').length>=2)badges.push("🚫 Professional DNF'er");
+  if(mineP.filter(p=>(p.moods||[]).some(m=>m.includes('😭'))).length>=2)badges.push('😭 Emotional damage');
+  if(mineP.filter(p=>new Date(p.createdAt).getHours()>=22).length>=2)badges.push('🦉 Night reader');
+  return `<div class="view"><div class="prof">
+      <div class="big">${me.avatar}</div><h1>${esc(me.alias)}</h1>
+      <p class="bio">${esc(me.bio||'No tagline yet.')}</p>
+      ${me.role!=='member'?`<span class="tagrole ${me.role}">${me.role}</span>`:''}
+      <div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn small" data-act="editme">Edit identity</button>
+        <button class="btn small ghost" data-act="invite">Invite friends</button>
+        <button class="btn small ghost" data-act="signout">Sign out</button></div>
+      <div class="stats">
+        <div class="stat-b"><div class="n">${fin}</div><div class="l">books finished</div></div>
+        <div class="stat-b"><div class="n">${avg}</div><div class="l">average rating</div></div>
+        <div class="stat-b"><div class="n">${mineP.length}</div><div class="l">things posted</div></div></div>
+      ${top.length?`<p style="font-size:13.5px;color:var(--muted);margin-top:14px">Mostly reads ${top.join(' · ')}</p>`:''}
+      ${badges.length?`<div class="badges">${badges.map((b,i)=>`<span class="badge" style="animation-delay:${i*70}ms">${b}</span>`).join('')}</div>`:''}
+    </div>
+    <div class="tabs">${Object.entries(tabs).map(([k,l])=>{const n=ids.filter(([,v])=>k==='fav'?v.fav:v.status===k).length;
+      return `<button data-act="shelftab" data-t="${k}" aria-selected="${shelfTab===k}">${l}${n?` (${n})`:''}</button>`}).join('')}</div>
+    ${list.length?`<div class="grid">${list.map(bookCardHTML).join('')}</div>`:emptyHTML('🗄','Nothing on this shelf yet.','Add a book','addbook')}
+    <div class="danger-zone">
+      <h3>Leaving the club</h3>
+      <p>Deleting your account signs you out for good and removes your name, avatar and shelves. You choose what happens to the things you wrote.</p>
+      <button class="btn small danger-btn" data-act="deleteme">Delete my account</button>
+    </div></div>`;
+}
+function vClub(){
+  const pend=S.members.filter(m=>m.role==='pending');
+  const mem=S.members.filter(m=>['member','moderator','owner'].includes(m.role))
+    .sort((a,b)=>({owner:0,moderator:1,member:2}[a.role]-{owner:0,moderator:1,member:2}[b.role]));
+  const blocked=S.members.filter(m=>m.role==='blocked');
+  const open=S.reports.filter(r=>!r.resolved);
+  const row=(m,extra)=>`<div class="mrow">${avHTML(m)}
+    <div><div class="nm">${esc(m.alias)} ${m.role!=='member'?`<span class="tagrole ${m.role}">${m.role}</span>`:''}</div>
+      <div class="sub">${esc(S.emails[m.id]||'')} · joined ${ago(m.joinedAt)}</div></div>
+    <div class="mact">${extra}</div></div>`;
+  return `<div class="view">
+    <div class="sec-head" style="margin-bottom:6px"><h2 style="font-size:27px">Running the club</h2>
+      <span class="hint">${isOwner()?'You own this one.':'You help run this one.'}</span></div>
+    <p class="help" style="max-width:62ch">Email addresses are only visible here, to you. Nobody in the club sees anyone else's.</p>
+
+    <div class="section"><div class="sec-head"><h2>Waiting to be let in</h2><span class="hint">${pend.length}</span></div>
+      ${pend.length?pend.map(m=>row(m,`<button class="btn small primary" data-act="approve" data-id="${m.id}">Let them in</button>
+        <button class="btn small danger-btn" data-act="block" data-id="${m.id}">Decline</button>`)).join('')
+        :`<p class="help">Nobody is waiting. When someone signs in, they'll appear here until you approve them.</p>`}</div>
+
+    <div class="section"><div class="sec-head"><h2>Members</h2><span class="hint">${mem.length}</span></div>
+      ${mem.map(m=>row(m, m.role==='owner'?'<span class="sub">can\'t be removed</span>':`
+        ${isOwner()?(m.role==='moderator'
+          ?`<button class="btn small" data-act="demote" data-id="${m.id}">Make member</button>`
+          :`<button class="btn small" data-act="promote" data-id="${m.id}">Make moderator</button>`):''}
+        <button class="btn small danger-btn" data-act="removeuser" data-id="${m.id}">Remove</button>`)).join('')}</div>
+
+    ${blocked.length?`<div class="section"><div class="sec-head"><h2>Removed</h2><span class="hint">${blocked.length}</span></div>
+      ${blocked.map(m=>row(m,`<button class="btn small" data-act="approve" data-id="${m.id}">Let them back in</button>`)).join('')}</div>`:''}
+
+    <div class="section"><div class="sec-head"><h2>Reported posts</h2><span class="hint">${open.length}</span></div>
+      ${open.length?open.map(r=>{const p=S.posts.find(x=>x.id===r.post_id);
+        return `<div class="post"><div class="sub" style="font-size:12.5px;color:var(--oxblood);margin-bottom:8px">
+          Reported ${ago(+new Date(r.created_at))}${r.reason?` · ${esc(r.reason)}`:''}</div>
+          ${p?`<p class="ptext">${esc(p.text.slice(0,300))}</p>`:'<p class="help">The post is already gone.</p>'}
+          <div class="pfoot"><button class="btn small" data-act="dismiss" data-id="${r.id}">Dismiss</button>
+          ${p?`<button class="btn small danger-btn" data-act="rmpost" data-id="${p.id}">Remove the post</button>`:''}</div></div>`}).join('')
+        :`<p class="help">Nothing reported. Quiet is good.</p>`}</div>
+
+    ${isOwner()?`<div class="section"><div class="sec-head"><h2>Settings</h2></div>
+      <div class="setbox">
+        <label class="f">Club name<input class="i" id="c-name" maxlength="60" value="${esc(S.meta.name)}"></label>
+        <label class="switch"><input type="checkbox" id="c-anon" ${S.meta.allowAnon?'checked':''}>
+          <span><span class="n">Allow anonymous posts</span>
+          <span class="d">Members can post as 🕵️ Anonymous Reader. Their name is hidden from other members, but it is stored in the database.</span></span></label>
+        <button class="btn primary small" data-act="savesettings">Save settings</button>
+      </div>
+      ${S.meta.rooms.length?`<div class="sec-head" style="margin-top:26px"><h2>Custom rooms</h2></div>
+        <div class="chips">${S.meta.rooms.map(r=>`<span class="chip">${r.e} ${esc(r.n)}
+          <button data-act="rmroom" data-id="${r.id}" style="margin-left:6px;color:var(--oxblood)">×</button></span>`).join('')}</div>`:''}
+    </div>`:''}
+  </div>`;
+}
+
+/* ══════════════════════ router ══════════════════════ */
+function render(){
+  if(!me) return;
+  $('#chrome').hidden=false; $('#tabbar').hidden=false;
+  const nav=[['home','Home'],['books','Books'],['rooms','Rooms'],['activity','Activity'],['me','Me']];
+  if(isStaff()) nav.push(['club','Club']);
+  $('#nav').innerHTML=nav.map(([v,l])=>`<button data-act="go" data-view="${v}" ${view.name===v||(v==='books'&&view.name==='book')?'aria-current="page"':''}>${l}${v==='club'&&S.members.some(m=>m.role==='pending')?' <span class="ping"></span>':''}</button>`).join('');
+  document.querySelectorAll('.tabbar button[data-view]').forEach(b=>b.setAttribute('aria-current',b.dataset.view===view.name?'page':'false'));
+  $('#meAv').textContent=me.avatar; $('#meName').textContent=me.alias;
+  $('#app').innerHTML = view.name==='books'?vBooks(view.genre) : view.name==='book'?vBook(view.id)
+    : view.name==='rooms'?vRooms() : view.name==='activity'?vActivity()
+    : view.name==='me'?vMe() : view.name==='club'?(isStaff()?vClub():vHome()) : vHome();
+  document.querySelectorAll('.post').forEach((el,i)=>el.style.animationDelay=Math.min(i*50,400)+'ms');
+  const q=$('#q'); if(q) q.oninput=e=>{draft.q=e.target.value; render(); const n=$('#q'); n.focus(); n.setSelectionRange(999,999)};
+}
+function go(name,extra={}){ view={name,...extra}; window.scrollTo({top:0,behavior:calm?'auto':'smooth'}); render() }
+
+/* ══════════════════════ sheets ══════════════════════ */
+function openSheet(html){ $('#sheet').innerHTML=`<div class="grab"></div>`+html; $('#veil').classList.add('on'); document.body.style.overflow='hidden' }
+function closeSheet(){ $('#veil').classList.remove('on'); document.body.style.overflow='' }
+function sheetCompose(){
+  openSheet(`<div class="sheet-head"><h3>What do you want to share?</h3><button class="x" data-act="close">&times;</button></div>
+  <div class="sheet-body"><div class="pickrow">
+    ${[['review','📖','Review a book','Rating, thoughts, a favourite quote'],
+       ['thought','💭','Quick thought','“WHY WOULD HE DO THAT” counts'],
+       ['update','📸','Reading update','Tell people how far you are'],
+       ['hottake','🔥','Hot take','Let everyone vote on whether you\'re wrong'],
+       ['addbook','📚','Add a book to the shelf','Put something new in the library']]
+      .map(([t,e,n,d])=>`<button class="bigpick" data-act="${t==='addbook'?'addbook':'compose2'}" data-type="${t}">
+        <span class="e">${e}</span><span><span class="n">${n}</span><span class="d">${d}</span></span></button>`).join('')}
+  </div><p class="help" style="margin-top:18px">Everything you post is visible to the other members of this club, and to nobody else.</p></div>`);
+}
+const bookOptions=sel=>S.books.slice().sort((a,b)=>a.title.localeCompare(b.title))
+  .map(b=>`<option value="${b.id}" ${sel===b.id?'selected':''}>${esc(b.title)}${b.author?' — '+esc(b.author):''}</option>`).join('');
+function sheetPost(type,bookId){
+  if(!S.books.length&&type!=='hottake') return sheetAddBook();
+  draft.moods=[]; draft.rating=0; draft.rec='';
+  const titles={review:'Write a review',thought:'Quick thought',update:'Reading update',hottake:'Drop a hot take'};
+  const cur=bookId||view.id||Object.keys(myShelf())[0]||S.books[0]?.id;
+  const bookField=type==='hottake'?'':`<label class="f">Which book?<select class="i" id="p-book">${bookOptions(cur)}</select></label>`;
+  let mid='';
+  if(type==='review'){
+    mid=`<label class="f">Overall rating<div class="starpick" id="p-stars">${[1,2,3,4,5].map(n=>`<button type="button" data-act="star" data-n="${n}" aria-pressed="false" aria-label="${n} stars"></button>`).join('')}</div></label>
+      <label class="f">Would you recommend it?<div class="chips" id="p-rec">${RECS.map(r=>`<button type="button" class="chip" data-act="rec" data-v="${r.v}" aria-pressed="false">${r.l}</button>`).join('')}</div></label>
+      <label class="f">Your review<textarea class="i" id="p-text" maxlength="5000" placeholder="No pressure to be clever. What did it actually do to you?"></textarea></label>
+      <div class="two"><label class="f">Favourite quote <span style="font-weight:400;color:var(--muted)">(optional, keep it short)</span>
+        <input class="i" id="p-quote" maxlength="200" placeholder="“…”"></label>
+        <label class="f">Favourite character <span style="font-weight:400;color:var(--muted)">(optional)</span><input class="i" id="p-char" maxlength="60"></label></div>
+      <label class="f">Mood<div class="chips" id="p-moods">${MOODS.map(m=>`<button type="button" class="chip brass" data-act="mood" data-m="${esc(m)}" aria-pressed="false">${m}</button>`).join('')}</div></label>`;
+  } else if(type==='update'){
+    const e=entry(me.id,cur)||{};
+    mid=`<label class="f">How far are you? <span id="p-pcl" style="color:var(--green)">${e.progress||0}%</span>
+      <input class="slider" type="range" id="p-prog" min="0" max="100" value="${e.progress||0}"></label>
+      <label class="f">Anything to say about it? <span style="font-weight:400;color:var(--muted)">(optional)</span>
+      <textarea class="i" id="p-text" maxlength="1000" style="min-height:90px" placeholder="Chapter 17??? WHAT."></textarea></label>`;
+  } else if(type==='hottake'){
+    mid=`<label class="f">Your take<textarea class="i" id="p-text" maxlength="300" style="min-height:100px" placeholder="Harry Potter is overrated."></textarea></label>
+      <p class="help">People vote agree or absolutely not. You'll see the split straight away.</p>`;
+  } else { mid=`<label class="f">What's on your mind?<textarea class="i" id="p-text" maxlength="2000" placeholder="I officially hate Sarah."></textarea></label>` }
+  openSheet(`<div class="sheet-head"><h3>${titles[type]}</h3><button class="x" data-act="close">&times;</button></div>
+   <div class="sheet-body">${bookField}${mid}
+     ${type!=='update'?`<label class="switch"><input type="checkbox" id="p-spoiler"><span><span class="n">This gives things away</span><span class="d">We'll hide it behind a spoiler screen</span></span></label>`:''}
+     ${S.meta.allowAnon?`<label class="switch"><input type="checkbox" id="p-anon"><span><span class="n">Post as 🕵️ Anonymous Reader</span><span class="d">Your name is hidden from other members.</span></span></label>`:''}
+   </div>
+   <div class="sheet-foot"><button class="btn" data-act="close">Cancel</button>
+     <button class="btn primary" data-act="savepost" data-type="${type}">Post it</button></div>`);
+  const sl=$('#p-prog'); if(sl) sl.oninput=e=>$('#p-pcl').textContent=e.target.value+'%';
+}
+function sheetAddBook(){
+  openSheet(`<div class="sheet-head"><h3>Add a book to the shelf</h3><button class="x" data-act="close">&times;</button></div>
+   <div class="sheet-body">
+     <div class="two"><label class="f">Title<input class="i" id="b-title" maxlength="120" placeholder="The Midnight Library"></label>
+       <label class="f">Author<input class="i" id="b-author" maxlength="90" placeholder="Matt Haig"></label></div>
+     <label class="f">Which room does it belong in?<select class="i" id="b-genre">${rooms().map(r=>`<option value="${r.id}">${r.e} ${r.n}</option>`).join('')}</select></label>
+     <label class="f">Where are you with it?<select class="i" id="b-status">
+       ${Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${k==='reading'?'selected':''}>${v.l}</option>`).join('')}
+       <option value="none">Just adding it for everyone else</option></select></label>
+     <p class="help">Covers are generated from the title, so you don't have to hunt for an image.</p></div>
+   <div class="sheet-foot"><button class="btn" data-act="close">Cancel</button>
+     <button class="btn primary" data-act="savebook">Put it on the shelf</button></div>`);
+}
+function sheetProgress(bookId){
+  const b=book(bookId), e=entry(me.id,bookId)||{};
+  openSheet(`<div class="sheet-head"><h3>${esc(b.title)}</h3><button class="x" data-act="close">&times;</button></div>
+   <div class="sheet-body">
+     <label class="f">How far are you? <span id="g-pcl" style="color:var(--green);font-size:16px">${e.progress||0}%</span>
+       <input class="slider" type="range" id="g-prog" min="0" max="100" value="${e.progress||0}"></label>
+     <p class="help" style="margin-top:-8px">Slide to 100% and the book closes itself.</p>
+     <label class="f">Add a note <span style="font-weight:400;color:var(--muted)">(optional — posts to the feed)</span>
+       <textarea class="i" id="g-text" maxlength="600" style="min-height:80px" placeholder="I'm emotionally attached already."></textarea></label>
+     <label class="switch"><input type="checkbox" id="g-fav"${e.fav?' checked':''}><span><span class="n">One of my favourites</span><span class="d">Pins it to your favourites shelf</span></span></label></div>
+   <div class="sheet-foot"><button class="btn" data-act="close">Cancel</button>
+     <button class="btn primary" data-act="saveprogress" data-id="${bookId}">Save progress</button></div>`);
+  $('#g-prog').oninput=e=>$('#g-pcl').textContent=e.target.value+'%';
+}
+function sheetDnf(bookId){
+  openSheet(`<div class="sheet-head"><h3>Putting it down?</h3><button class="x" data-act="close">&times;</button></div>
+   <div class="sheet-body">
+     <p class="help" style="font-size:14px;font-family:var(--serif);font-style:italic">Life is too short to finish books you hate. It goes on the DNF wall, which is one of the better walls.</p>
+     <label class="f">Why?<div class="chips" id="d-reason">${DNF_REASONS.map(r=>`<button type="button" class="chip" data-act="dnfr" data-r="${esc(r)}" aria-pressed="false">${r}</button>`).join('')}</div></label>
+     <label class="f">How far did you get? <span id="d-pcl" style="color:var(--oxblood)">${entry(me.id,bookId)?.progress||0}%</span>
+       <input class="slider" type="range" id="d-prog" min="0" max="100" value="${entry(me.id,bookId)?.progress||0}"></label></div>
+   <div class="sheet-foot"><button class="btn" data-act="close">Cancel</button>
+     <button class="btn primary" data-act="savednf" data-id="${bookId}">Add to the DNF wall</button></div>`);
+  $('#d-prog').oninput=e=>$('#d-pcl').textContent=e.target.value+'%';
+}
+function sheetInvite(){
+  const url=location.origin+location.pathname;
+  openSheet(`<div class="sheet-head"><h3>Invite your people</h3><button class="x" data-act="close">&times;</button></div>
+   <div class="sheet-body">
+     <p class="help" style="font-size:14.5px;line-height:1.7">Send them this link. They sign in with their email, and then wait for
+       ${isOwner()?'you':'the owner'} to let them in. Nobody gets to read anything before that.</p>
+     <label class="f">Club link<input class="i" id="inv" readonly value="${esc(url)}"></label>
+     <button class="btn primary" data-act="copylink" style="width:100%">Copy the link</button>
+     <p class="help" style="margin-top:18px">${S.members.filter(m=>!['pending','blocked'].includes(m.role)).length} in the club so far:
+       ${S.members.filter(m=>!['pending','blocked'].includes(m.role)).map(m=>m.avatar+' '+esc(m.alias)).join(' · ')}</p>
+   </div><div style="height:14px"></div>`);
+}
+function sheetNewRoom(){
+  openSheet(`<div class="sheet-head"><h3>Make a room</h3><button class="x" data-act="close">&times;</button></div>
+   <div class="sheet-body"><p class="help">This is where the club gets its personality. “Books that emotionally destroyed us.” “Books we're pretending to understand.”</p>
+     <div class="two"><label class="f">Room name<input class="i" id="r-name" maxlength="42" placeholder="Unhinged characters"></label>
+       <label class="f">Emoji<input class="i" id="r-emoji" maxlength="4" value="📖"></label></div></div>
+   <div class="sheet-foot"><button class="btn" data-act="close">Cancel</button>
+     <button class="btn primary" data-act="saveroom">Create room</button></div>`);
+}
+function sheetEditMe(){
+  draft.av=me.avatar;
+  openSheet(`<div class="sheet-head"><h3>Your identity here</h3><button class="x" data-act="close">&times;</button></div>
+   <div class="sheet-body">
+     <label class="f">Display name<input class="i" id="m-alias" maxlength="28" value="${esc(me.alias)}"></label>
+     <label class="f">Tagline<input class="i" id="m-bio" maxlength="90" placeholder="I read to avoid reality." value="${esc(me.bio||'')}"></label>
+     <label class="f">Avatar</label>
+     <div class="avgrid" id="m-av">${AVATARS.map(a=>`<button type="button" data-act="pickav" data-a="${a}" aria-pressed="${a===me.avatar}">${a}</button>`).join('')}</div></div>
+   <div class="sheet-foot"><button class="btn" data-act="close">Cancel</button>
+     <button class="btn primary" data-act="saveme">Save</button></div>`);
+}
+function sheetDeleteMe(){
+  const n=S.posts.filter(p=>p.userId===me.id).length;
+  openSheet(`<div class="sheet-head"><h3>Delete your account</h3><button class="x" data-act="close">&times;</button></div>
+   <div class="sheet-body">
+     <p class="help" style="font-size:14.5px;line-height:1.7">This signs you out permanently and removes your name, avatar, shelves, reactions and votes.
+       You've written <b>${n}</b> ${n===1?'thing':'things'} in here. Choose what happens to ${n===1?'it':'them'}.</p>
+     <div class="pickrow">
+       <button class="bigpick" data-act="confirmdelete" data-keep="1"><span class="e">🕵️</span>
+         <span><span class="n">Keep them, without my name</span>
+         <span class="d">Your reviews and replies stay so threads still make sense, credited to Anonymous Reader.</span></span></button>
+       <button class="bigpick" data-act="confirmdelete" data-keep="0"><span class="e">🔥</span>
+         <span><span class="n">Delete everything I wrote</span>
+         <span class="d">Every review, thought, take and reply goes with you. Replies underneath them go too.</span></span></button>
+     </div>
+     <p class="help" style="margin-top:18px">Either way this can't be undone. If you sign in again later you'll come in as a new person and need approval.</p>
+   </div><div style="height:16px"></div>`);
+}
+function sheetRemoveUser(id){
+  const m=member(id), n=S.posts.filter(p=>p.userId===id).length;
+  openSheet(`<div class="sheet-head"><h3>Remove ${esc(m.alias)}</h3><button class="x" data-act="close">&times;</button></div>
+   <div class="sheet-body">
+     <p class="help" style="font-size:14.5px;line-height:1.7">They lose access straight away and can't get back in unless you let them.
+       They've written <b>${n}</b> ${n===1?'thing':'things'}.</p>
+     <div class="pickrow">
+       <button class="bigpick" data-act="doremove" data-id="${id}" data-wipe="0"><span class="e">🚪</span>
+         <span><span class="n">Remove them, leave their posts</span><span class="d">Threads stay readable.</span></span></button>
+       <button class="bigpick" data-act="doremove" data-id="${id}" data-wipe="1"><span class="e">🔥</span>
+         <span><span class="n">Remove them and delete their posts</span><span class="d">For when it isn't just a falling-out.</span></span></button>
+     </div></div><div style="height:16px"></div>`);
+}
+
+/* ══════════════════════ effects ══════════════════════ */
+function floaters(el,emoji){
+  if(calm||!el) return;
+  const r=el.getBoundingClientRect();
+  for(let i=0;i<6;i++){
+    const s=document.createElement('span'); s.className='spark'; s.textContent=emoji;
+    s.style.left=(r.left+r.width/2)+'px'; s.style.top=r.top+'px';
+    s.style.setProperty('--dx',(Math.random()*120-60)+'px'); s.style.setProperty('--dr',(Math.random()*90-45)+'deg');
+    s.style.animationDelay=(i*50)+'ms'; document.body.appendChild(s); setTimeout(()=>s.remove(),1500);
+  }
+}
+function celebrate(title,sub){
+  const d=document.createElement('div'); d.className='cheer';
+  d.innerHTML=`<div class="box"><h2>${title}</h2><p>${sub}</p></div>`; document.body.appendChild(d);
+  if(!calm) for(let i=0;i<18;i++) setTimeout(()=>{
+    const s=document.createElement('span'); s.className='spark'; s.textContent=['✨','🎉','⭐️','📖'][i%4];
+    s.style.left=(innerWidth/2+(Math.random()*260-130))+'px'; s.style.top=(innerHeight/2)+'px';
+    s.style.setProperty('--dx',(Math.random()*220-110)+'px'); s.style.setProperty('--dr',(Math.random()*180-90)+'deg');
+    document.body.appendChild(s); setTimeout(()=>s.remove(),1500);
+  },i*45);
+  setTimeout(()=>d.remove(),2400);
+}
+
+/* ══════════════════════ writes ══════════════════════ */
+async function upsertShelf(bookId,patch){
+  const cur=entry(me.id,bookId)||{};
+  const rec={user_id:me.id,book_id:bookId,status:patch.status??cur.status??'reading',
+    progress:patch.progress??cur.progress??0,dnf_reason:patch.dnfReason??cur.dnfReason??'',
+    fav:patch.fav??cur.fav??false,updated_at:new Date().toISOString()};
+  return sb.from('shelf').upsert(rec,{onConflict:'user_id,book_id'});
+}
+async function setStatus(bookId,status){
+  if(status==='dnf') return sheetDnf(bookId);
+  const cur=entry(me.id,bookId);
+  if(cur&&cur.status===status){
+    if(!chk(await sb.from('shelf').delete().eq('user_id',me.id).eq('book_id',bookId))) return;
+    return refresh();
+  }
+  const finishing=status==='finished'&&(!cur||cur.status!=='finished');
+  if(!chk(await upsertShelf(bookId,{status,progress:status==='finished'?100:(cur?.progress||0)}))) return;
+  await refresh();
+  if(finishing) celebrate('You finished it! 🎉','Go on then, tell everyone what you thought.');
+}
+
+/* ══════════════════════ events ══════════════════════ */
+document.addEventListener('click',async e=>{
+  const el=e.target.closest('[data-act]'); if(!el||!me) return;
+  const a=el.dataset.act;
+  if(['book','go','room'].includes(a)) e.preventDefault();
+
+  if(a==='go') return go(el.dataset.view);
+  if(a==='book'){ closeSheet(); return go('book',{id:el.dataset.id}) }
+  if(a==='room'){ closeSheet(); return go('books',{genre:el.dataset.id}) }
+  if(a==='back') return go('books');
+  if(a==='close') return closeSheet();
+  if(a==='compose') return el.dataset.type?sheetPost(el.dataset.type,el.dataset.book):sheetCompose();
+  if(a==='compose2') return sheetPost(el.dataset.type);
+  if(a==='addbook') return sheetAddBook();
+  if(a==='progress') return sheetProgress(el.dataset.id);
+  if(a==='invite') return sheetInvite();
+  if(a==='newroom') return sheetNewRoom();
+  if(a==='editme') return sheetEditMe();
+  if(a==='deleteme') return sheetDeleteMe();
+  if(a==='removeuser') return sheetRemoveUser(el.dataset.id);
+  if(a==='viewmode'){ draft.shelfview=el.dataset.m==='shelf'; return render() }
+  if(a==='shelftab'){ shelfTab=el.dataset.t; return render() }
+  if(a==='status') return setStatus(el.dataset.id,el.dataset.s);
+  if(a==='signout'){ await sb.auth.signOut(); return location.reload() }
+  if(a==='unlock'){ const w=document.getElementById('hidden-'+el.dataset.id); if(w){w.hidden=false; el.closest('.locked').remove()} return }
+  if(a==='thread'){ document.getElementById('th-'+el.dataset.id)?.classList.toggle('on'); return }
+  if(a==='copylink'){ try{ await navigator.clipboard.writeText(location.origin+location.pathname); toast('Link copied — send it to your people.') }
+    catch(err){ $('#inv')?.select(); toast('Select the link above and copy it.') } return }
+
+  if(a==='star'){ draft.rating=+el.dataset.n; document.querySelectorAll('#p-stars button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.n<=draft.rating)); return }
+  if(a==='rec'){ draft.rec=el.dataset.v; document.querySelectorAll('#p-rec button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===draft.rec)); return }
+  if(a==='mood'){ const m=el.dataset.m; draft.moods=draft.moods||[]; const i=draft.moods.indexOf(m);
+    i>-1?draft.moods.splice(i,1):draft.moods.push(m); el.setAttribute('aria-pressed',draft.moods.includes(m)); return }
+  if(a==='dnfr'){ draft.dnfr=el.dataset.r; document.querySelectorAll('#d-reason button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===draft.dnfr)); return }
+  if(a==='pickav'){ draft.av=el.dataset.a; document.querySelectorAll('#m-av button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.a===draft.av)); return }
+
+  if(a==='palette'){
+    document.querySelectorAll('.pal').forEach(p=>p.remove());
+    const pal=document.createElement('div'); pal.className='pal';
+    pal.innerHTML=REACTIONS.map(r=>`<button data-act="react" data-id="${el.dataset.id}" data-k="${r.k}" title="${r.l}">${r.k}</button>`).join('');
+    el.parentElement.appendChild(pal); return;
+  }
+  if(a==='react'){
+    const k=el.dataset.k,id=el.dataset.id;
+    document.querySelectorAll('.pal').forEach(p=>p.remove());
+    const p=S.posts.find(x=>x.id===id); const had=(p?.reactions?.[k]||[]).includes(me.id);
+    if(had) await sb.from('reactions').delete().eq('post_id',id).eq('user_id',me.id).eq('emoji',k);
+    else { await sb.from('reactions').insert({post_id:id,user_id:me.id,emoji:k}); floaters(el,k) }
+    return refresh();
+  }
+  if(a==='vote'){
+    const id=el.dataset.id,v=el.dataset.v;
+    const p=S.posts.find(x=>x.id===id); const had=(p?.votes?.[v]||[]).includes(me.id);
+    if(had) await sb.from('votes').delete().eq('post_id',id).eq('user_id',me.id);
+    else await sb.from('votes').upsert({post_id:id,user_id:me.id,choice:v},{onConflict:'post_id,user_id'});
+    return refresh();
+  }
+  if(a==='report'){
+    const reason=prompt('What\'s wrong with it? (optional)')??'';
+    if(!chk(await sb.from('reports').insert({post_id:el.dataset.id,reporter:me.id,reason:reason.slice(0,200)}))) return;
+    toast('Reported. Only the people running the club see this.'); return;
+  }
+  if(a==='rmpost'){
+    const own=S.posts.find(p=>p.id===el.dataset.id)?.userId===me.id;
+    if(!confirm(own?'Delete this? Replies underneath it go too.':'Remove this post?')) return;
+    if(!chk(await sb.from('posts').delete().eq('id',el.dataset.id))) return;
+    return refresh();
+  }
+  if(a==='rmbook'){
+    if(!confirm('Remove this book? Everything written about it goes too.')) return;
+    if(!chk(await sb.from('books').delete().eq('id',el.dataset.id))) return;
+    return go('books');
+  }
+
+  if(a==='savebook'){
+    const title=$('#b-title').value.trim(); if(!title) return toast('It needs a title at least.');
+    el.disabled=true;
+    const res=await sb.from('books').insert({title,author:$('#b-author').value.trim(),genre:$('#b-genre').value,added_by:me.id}).select().single();
+    el.disabled=false; if(!chk(res)) return;
+    const st=$('#b-status').value;
+    if(st!=='none'){ await sb.from('shelf').insert({user_id:me.id,book_id:res.data.id,status:st,progress:st==='finished'?100:0}) }
+    closeSheet(); await refresh(); go('book',{id:res.data.id}); toast('On the shelf.'); return;
+  }
+  if(a==='savepost'){
+    const type=el.dataset.type, text=($('#p-text')?.value||'').trim();
+    if(type!=='review'&&!text) return toast('Say something first.');
+    if(type==='review'&&!text&&!draft.rating) return toast('A rating or a few words — either is fine.');
+    el.disabled=true; el.textContent='Posting…';
+    const bookId=type==='hottake'?null:($('#p-book')?.value||null);
+    const prog=$('#p-prog')?+$('#p-prog').value:(entry(me.id,bookId)?.progress||0);
+    const res=await sb.from('posts').insert({type,book_id:bookId,user_id:me.id,
+      anon:!!$('#p-anon')?.checked, spoiler:!!$('#p-spoiler')?.checked, body:text,
+      rating:draft.rating||0, recommend:draft.rec||'', moods:draft.moods||[],
+      quote:($('#p-quote')?.value||'').trim(), fav_character:($('#p-char')?.value||'').trim(),
+      at_progress:type==='review'?100:prog});
+    el.disabled=false; el.textContent='Post it';
+    if(!chk(res)) return;
+    let finishing=false;
+    if(bookId){
+      const cur=entry(me.id,bookId);
+      if(type==='update'){ finishing=prog>=100&&cur?.status!=='finished';
+        await upsertShelf(bookId,{progress:prog,status:prog>=100?'finished':'reading'}) }
+      else if(type==='review'){ finishing=cur?.status!=='finished'; await upsertShelf(bookId,{status:'finished',progress:100}) }
+      else if(!cur){ await upsertShelf(bookId,{status:'reading'}) }
+    }
+    closeSheet(); await refresh();
+    if(bookId) go('book',{id:bookId}); else if(type==='hottake') go('rooms'); else go('home');
+    if(finishing) celebrate('You finished it! 🎉','That one is officially behind you.');
+    else toast(type==='hottake'?'Take posted. Brace yourself.':'Posted.');
+    return;
+  }
+  if(a==='saveprogress'){
+    const id=el.dataset.id, prog=+$('#g-prog').value, note=$('#g-text').value.trim(), fav=$('#g-fav').checked;
+    const cur=entry(me.id,id); const finishing=prog>=100&&cur?.status!=='finished';
+    if(!chk(await upsertShelf(id,{progress:prog,status:prog>=100?'finished':'reading',fav}))) return;
+    if(note) await sb.from('posts').insert({type:'update',book_id:id,user_id:me.id,body:note,at_progress:prog});
+    closeSheet(); await refresh();
+    if(finishing) celebrate('You finished it! 🎉','Tell them what you thought while it\'s fresh.');
+    else toast('Progress saved.');
+    return;
+  }
+  if(a==='savednf'){
+    if(!chk(await upsertShelf(el.dataset.id,{status:'dnf',progress:+$('#d-prog').value,dnfReason:draft.dnfr||''}))) return;
+    draft.dnfr=null; closeSheet(); await refresh(); toast('On the DNF wall. No shame in it.'); return;
+  }
+  if(a==='saveroom'){
+    const n=$('#r-name').value.trim(); if(!n) return toast('Give the room a name.');
+    const id='c-'+n.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,30)+'-'+uid().slice(-4);
+    if(!chk(await sb.from('rooms').insert({id,name:n,emoji:$('#r-emoji').value.trim()||'📖',created_by:me.id}))) return;
+    closeSheet(); await refresh(); go('books',{genre:id}); toast('Room made.'); return;
+  }
+  if(a==='saveme'){
+    const alias=$('#m-alias').value.trim()||me.alias;
+    if(!chk(await sb.from('profiles').update({alias,bio:$('#m-bio').value.trim(),avatar:draft.av||me.avatar}).eq('id',me.id))) return;
+    closeSheet(); await refresh(); toast('Updated.'); return;
+  }
+  if(a==='confirmdelete'){
+    if(!confirm('Last check — delete your account for good?')) return;
+    el.disabled=true;
+    const res=await sb.rpc('delete_me',{keep_posts:el.dataset.keep==='1'});
+    if(res.error){ el.disabled=false; return toast(res.error.message) }
+    await sb.auth.signOut(); location.reload(); return;
+  }
+
+  /* owner + moderator */
+  if(a==='approve'){ if(!chk(await sb.from('profiles').update({role:'member'}).eq('id',el.dataset.id))) return;
+    await refresh(); toast('They\'re in.'); return }
+  if(a==='block'){ if(!chk(await sb.from('profiles').update({role:'blocked'}).eq('id',el.dataset.id))) return;
+    await refresh(); toast('Declined.'); return }
+  if(a==='promote'){ if(!chk(await sb.from('profiles').update({role:'moderator'}).eq('id',el.dataset.id))) return;
+    await refresh(); toast('They can help run it now.'); return }
+  if(a==='demote'){ if(!chk(await sb.from('profiles').update({role:'member'}).eq('id',el.dataset.id))) return;
+    await refresh(); return }
+  if(a==='doremove'){
+    const id=el.dataset.id;
+    if(el.dataset.wipe==='1'){ if(!chk(await sb.from('posts').delete().eq('user_id',id))) return }
+    if(!chk(await sb.from('profiles').update({role:'blocked'}).eq('id',id))) return;
+    closeSheet(); await refresh(); toast('Removed.'); return;
+  }
+  if(a==='dismiss'){ await sb.from('reports').update({resolved:true}).eq('id',el.dataset.id); return refresh() }
+  if(a==='rmroom'){ if(!confirm('Delete this room? Books in it stay, but lose their room.')) return;
+    await sb.from('rooms').delete().eq('id',el.dataset.id); return refresh() }
+  if(a==='savesettings'){
+    if(!chk(await sb.from('club').update({name:$('#c-name').value.trim()||'Between the Pages',allow_anon:$('#c-anon').checked}).eq('id',1))) return;
+    await refresh(); toast('Saved.'); return;
+  }
+});
+document.addEventListener('submit',async e=>{
+  const f=e.target.closest('[data-act="comment"]'); if(!f) return;
+  e.preventDefault();
+  const input=f.querySelector('input'), text=input.value.trim(); if(!text) return;
+  const parentId=f.dataset.id; input.value='';
+  if(!chk(await sb.from('posts').insert({type:'comment',parent_id:parentId,user_id:me.id,body:text}))) return;
+  await refresh(); document.getElementById('th-'+parentId)?.classList.add('on');
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeSheet(); document.querySelectorAll('.pal').forEach(p=>p.remove()) } });
+$('#veil').addEventListener('click',e=>{ if(e.target.id==='veil') closeSheet() });
+
+/* ══════════════════════ auth + onboarding screens ══════════════════════ */
+const showBoot=()=>{ $('#boot').style.display='grid'; $('#chrome').hidden=true; $('#tabbar').hidden=true };
+const hideBoot=()=>{ $('#boot').classList.add('gone'); setTimeout(()=>{$('#boot').style.display='none'; $('#boot').classList.remove('gone')},600) };
+let ob={step:0,alias:'',avatar:AVATARS[0],genres:[]};
+const SUGGESTED=['BookWorm','Midnight Reader','Page Turner','The Librarian','Plot Twist','Anonymous Goose 🪿','Chapter Gremlin','Margin Scribbler'];
+
+function screenSignIn(sent){
+  showBoot();
+  $('#boot').innerHTML = sent
+   ? `<div class="step"><div class="bookopen"><div class="leaf l"></div><div class="leaf r"></div></div>
+      <h2>Check your email</h2>
+      <p class="sub">We sent a sign-in link to <b>${esc(sent)}</b>. Open it on this device and you'll land straight back here. It can take a minute.</p>
+      <button class="btn" data-au="back">Use a different address</button></div>`
+   : `<div class="step"><div class="bookopen"><div class="leaf l"></div><div class="leaf r"></div></div>
+      <h2>Between the Pages</h2>
+      <p class="sub">A private reading room for one group of friends. Sign in with your email — no password to remember — and the owner will let you in.</p>
+      <input class="i" id="au-email" type="email" autocomplete="email" placeholder="you@example.com" style="text-align:center;margin-bottom:12px">
+      <button class="btn primary" data-au="magic" style="width:100%;margin-bottom:10px">Email me a sign-in link</button>
+      <button class="btn" data-au="google" style="width:100%">Continue with Google</button>
+      <p class="help" style="margin-top:20px">Your email is only ever visible to whoever runs the club. Other members see the name you pick next.</p></div>`;
+}
+function screenSetup(){
+  showBoot();
+  const steps=[
+   ()=>`<div class="step"><h2>What should we call you?</h2>
+      <p class="sub">Use your name or make one up. Most people have more fun with a pseudonym — it's what everyone in here will see.</p>
+      <input class="i" id="ob-alias" maxlength="28" placeholder="Midnight Reader" value="${esc(ob.alias)}" style="text-align:center;font-size:19px;margin-bottom:16px">
+      <div class="chips" style="justify-content:center;margin-bottom:24px">${SUGGESTED.map(s=>`<button class="chip" data-ob="suggest" data-v="${esc(s)}">${s}</button>`).join('')}</div>
+      <button class="btn primary" data-ob="next">That's me</button></div>`,
+   ()=>`<div class="step"><h2>Pick a face</h2><p class="sub">No photos needed.</p>
+      <div class="avgrid">${AVATARS.map(a=>`<button data-ob="av" data-v="${a}" aria-pressed="${a===ob.avatar}">${a}</button>`).join('')}</div>
+      <button class="btn primary" data-ob="next">Looks like me</button></div>`,
+   ()=>`<div class="step"><h2>What do you actually read?</h2><p class="sub">Pick a few. This just helps the room feel like yours.</p>
+      <div class="chips" style="justify-content:center;margin-bottom:26px">${GENRES.map(g=>`<button class="chip" data-ob="g" data-v="${g.id}" aria-pressed="${ob.genres.includes(g.id)}">${g.e} ${g.n}</button>`).join('')}</div>
+      <button class="btn primary" data-ob="finish">Done</button></div>`
+  ];
+  $('#boot').innerHTML=steps[ob.step]()+`<div class="dots">${steps.map((_,i)=>`<i class="${i===ob.step?'on':''}"></i>`).join('')}</div>`;
+}
+function screenPending(){
+  showBoot();
+  $('#boot').innerHTML=`<div class="step"><div class="bookopen"><div class="leaf l"></div><div class="leaf r"></div></div>
+    <h2>You're on the list, ${esc(me.alias)} ${me.avatar}</h2>
+    <p class="sub">The club is invite-only, so the owner has to let you in. You'll get straight through next time you open this link once they have.</p>
+    <button class="btn primary" data-au="recheck">Check again</button>
+    <button class="btn ghost" data-au="signout" style="margin-top:10px">Sign out</button></div>`;
+}
+function screenBlocked(){
+  showBoot();
+  $('#boot').innerHTML=`<div class="step"><h2>No access</h2>
+    <p class="sub">This account isn't part of the club. If that's a mistake, ask whoever runs it to let you back in.</p>
+    <button class="btn" data-au="signout">Sign out</button></div>`;
+}
+document.addEventListener('click',async e=>{
+  const el=e.target.closest('[data-au]'); if(!el) return;
+  const a=el.dataset.au;
+  if(a==='back') return screenSignIn(null);
+  if(a==='signout'){ await sb.auth.signOut(); return location.reload() }
+  if(a==='recheck') return start();
+  if(a==='magic'){
+    const email=($('#au-email').value||'').trim();
+    if(!/.+@.+\..+/.test(email)) return toast('That doesn\'t look like an email address.');
+    el.disabled=true; el.textContent='Sending…';
+    const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}});
+    el.disabled=false; el.textContent='Email me a sign-in link';
+    if(error) return toast(error.message);
+    return screenSignIn(email);
+  }
+  if(a==='google'){
+    const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
+    if(error) toast('Google sign-in isn\'t switched on yet — use the email link.');
+    return;
+  }
+});
+document.addEventListener('click',async e=>{
+  const el=e.target.closest('[data-ob]'); if(!el) return;
+  const a=el.dataset.ob;
+  if(a==='suggest'){ ob.alias=el.dataset.v; $('#ob-alias').value=ob.alias; return }
+  if(a==='av'){ ob.avatar=el.dataset.v; document.querySelectorAll('[data-ob="av"]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===ob.avatar)); return }
+  if(a==='g'){ const v=el.dataset.v; const i=ob.genres.indexOf(v); i>-1?ob.genres.splice(i,1):ob.genres.push(v);
+    el.setAttribute('aria-pressed',ob.genres.includes(v)); return }
+  if(a==='next'){
+    if(ob.step===0){ const v=$('#ob-alias').value.trim(); if(!v) return toast('Pick something — anything.'); ob.alias=v.slice(0,28) }
+    ob.step++; return screenSetup();
+  }
+  if(a==='finish'){
+    el.disabled=true; el.textContent='Setting up…';
+    const res=await sb.from('profiles').insert({id:session.user.id,alias:ob.alias,avatar:ob.avatar,bio:''}).select().single();
+    if(res.error){ el.disabled=false; el.textContent='Done'; return toast(res.error.message) }
+    return start();
+  }
+});
+
+/* ══════════════════════ start ══════════════════════ */
+async function start(){
+  if(SUPABASE_URL.includes('YOUR-PROJECT-ID')){
+    showBoot();
+    $('#boot').innerHTML=`<div class="step"><h2>Almost there</h2>
+      <p class="sub">Open this file and paste your Supabase project URL and anon key into the two lines at the top of the script. The setup guide walks through it.</p></div>`;
+    return;
+  }
+  const {data:{session:s}}=await sb.auth.getSession();
+  session=s;
+  if(!session) return screenSignIn(null);
+  const {data:prof,error}=await sb.from('profiles').select('*').eq('id',session.user.id).maybeSingle();
+  if(error){ toast(error.message); return screenSignIn(null) }
+  if(!prof){ ob={step:0,alias:'',avatar:AVATARS[0],genres:[]}; return screenSetup() }
+  me={id:prof.id,alias:prof.alias,avatar:prof.avatar,bio:prof.bio||'',role:prof.role};
+  if(prof.role==='pending') return screenPending();
+  if(prof.role==='blocked') return screenBlocked();
+  await loadAll(); subscribe(); hideBoot(); render();
+}
+sb.auth.onAuthStateChange((event)=>{ if(event==='SIGNED_IN'&&!me) start() });
+start();
+
+</script>
+</body>
+</html>
